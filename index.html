@@ -6,191 +6,98 @@
     <title>Archive of Our Own beta - Mein universelles Browser-Archiv</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { 
-            font-family: "Lucida Grande", "Lucida Sans Unicode", sans-serif;
-            margin: 0; padding: 0; background-color: #ffffff; color: #333333; font-size: 13px;
-        }
+        body { font-family: "Lucida Grande", sans-serif; margin: 0; padding: 0; background-color: #ffffff; color: #333333; font-size: 13px; }
         .ao3-header { background: #990000; color: #ffffff; padding: 12px 20px; border-bottom: 4px solid #fff; }
         .ao3-header h1 { font-family: Georgia, serif; font-size: 28px; margin: 0; font-weight: normal; }
         .main-content { max-width: 1100px; margin: 20px auto; padding: 0 20px; }
-        
-        /* STATISTIK-KACHELN */
         .stats-grid { display: flex; gap: 15px; margin-bottom: 25px; }
-        .stat-card { 
-            flex: 1; background: #fff3f3; border: 1px solid #ffcccc; 
-            border-radius: 4px; padding: 15px; text-align: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .stat-card h4 { margin: 0; color: #666; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        .stat-card { flex: 1; background: #fff3f3; border: 1px solid #ffcccc; border-radius: 4px; padding: 15px; text-align: center; }
+        .stat-card h4 { margin: 0; color: #666; text-transform: uppercase; font-size: 11px; }
         .stat-card p { margin: 8px 0 0 0; font-family: Georgia, serif; font-size: 22px; font-weight: bold; color: #990000; }
-        .stat-card .sub-text { font-size: 11px; color: #666; font-style: italic; margin-top: 4px; }
-
+        .stat-card .sub-text { font-size: 11px; color: #666; font-style: italic; }
         fieldset { border: 1px solid #ccc; border-radius: 4px; padding: 20px; margin-bottom: 25px; background: #fcfcfc; }
         legend { font-family: Georgia, serif; font-size: 16px; color: #990000; font-weight: bold; padding: 0 6px; }
-        
-        textarea { width: 100%; padding: 8px; border: 1px solid #bbb; border-radius: 3px; box-sizing: border-box; font-family: monospace; }
-        .actions { margin-top: 15px; text-align: right; }
-        
-        button {
-            padding: 6px 14px; font-size: 13px; font-weight: bold; color: #444; 
-            background: linear-gradient(to bottom, #ffffff 0%, #e1e1e1 100%);
-            border: 1px solid #bbb; border-radius: 4px; cursor: pointer;
-        }
-        button:hover:not(:disabled) { background: #d4d4d4; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        .btn-backup { background: linear-gradient(to bottom, #fff 0%, #eaeaee 100%); color: #333; }
-        
-        /* PROGRESS BAR */
-        .progress-card { display: none; background: #fff3f3; border: 1px solid #ffcccc; padding: 15px; margin-bottom: 25px; border-radius: 4px; }
-        .bar-container { background: #ddd; border: 1px solid #bbb; height: 14px; border-radius: 3px; overflow: hidden; margin-top: 5px; }
-        .bar-fill { background: #990000; height: 100%; width: 0%; transition: width 0.3s; }
-        .log-box { background: #f4f4f4; border: 1px solid #ccc; border-radius: 4px; padding: 10px; height: 120px; overflow-y: auto; font-family: monospace; font-size: 11px; margin-top: 10px; white-space: pre-line; }
-        
-        /* DIAGRAMM BEREICH */
-        .chart-container { max-width: 600px; margin: 15px auto; background: #fff; padding: 15px; border: 1px solid #ddd; border-radius: 4px; }
-
-        /* BIBLIOTHEK-TABELLE */
+        button { padding: 6px 14px; font-size: 13px; font-weight: bold; color: #444; background: linear-gradient(to bottom, #ffffff 0%, #e1e1e1 100%); border: 1px solid #bbb; border-radius: 4px; cursor: pointer; }
         .ao3-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .ao3-table th { background: #eaeaee; color: #000; border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 12px; }
-        .ao3-table td { border: 1px solid #ccc; padding: 8px; vertical-align: top; }
+        .ao3-table th { background: #eaeaee; color: #000; border: 1px solid #ccc; padding: 8px; font-size: 12px; text-align: left; }
+        .ao3-table td { border: 1px solid #ccc; padding: 8px; }
         .ao3-table tr:nth-child(even) { background: #f7f7fa; }
         .ao3-table a { color: #900; font-weight: bold; text-decoration: none; }
-        .ao3-table a:hover { text-decoration: underline; }
+        .chart-container { max-width: 600px; margin: 15px auto; background: #fff; padding: 15px; border: 1px solid #ddd; border-radius: 4px; }
     </style>
 </head>
 <body>
 
 <div class="ao3-header">
     <h1>Archive of Our Own</h1>
-    <div style="font-size: 14px; color: #ffcccc; font-weight: bold;">Mein unzerstörbares Browser-Archiv (Community-Edition)</div>
+    <div style="font-size: 14px; color: #ffcccc; font-weight: bold;">Mein unzerstörbares Browser-Archiv (User-Script Edition)</div>
 </div>
 
 <div class="main-content">
-    
     <div class="stats-grid">
         <div class="stat-card">
             <h4>Werke in deiner Schachtel</h4>
             <p id="stat-total-fics">0</p>
-            <div class="sub-text">Gefundene Beweismittel</div>
+            <div class="sub-text">Eingesammelte Fics</div>
         </div>
         <div class="stat-card">
             <h4>Wörter verschlungen</h4>
             <p id="stat-total-words">0</p>
-            <div id="literary-comparison" class="sub-text">Bereit für den Literaturnobelpreis?</div>
+            <div id="literary-comparison" class="sub-text">-</div>
         </div>
         <div class="stat-card">
             <h4>Lieblings-Autor/in</h4>
             <p id="stat-top-author" style="font-size: 16px; margin-top: 12px;">Noch niemand</p>
-            <div class="sub-text">Besitzt aktuell deine Seele</div>
+            <div class="sub-text">Besitzt deine Seele</div>
         </div>
     </div>
-
-    <fieldset>
-        <legend>Einspeisung: Neue URLs untereinander einwerfen</legend>
-        <textarea id="urls-input" rows="4" placeholder="https://archiveofourown.org/works/111111&#10;https://archiveofourown.org/works/222222"></textarea>
-        <div class="actions">
-            <button id="start-btn" onclick="startBatchImport()">In die Schachtel sortieren</button>
-        </div>
-    </fieldset>
-
-    <div id="progress-section" class="progress-card">
-        <div style="display:flex; justify-content:space-between; font-weight:bold; color:#990000;">
-            <span id="status-msg">Browser-Roboter arbeitet...</span>
-            <span id="prog-text">0 / 0 (0%)</span>
-        </div>
-        <div class="bar-container"><div id="prog-bar" class="bar-fill"></div></div>
-        <p style="font-size:11px; color:#666; margin: 10px 0 0 0;">Protokoll:</p>
-        <div id="log-box" class="log-box">Bereit...</div>
-    </div>
-
-    <iframe id="secret-loader" style="display: none; width: 0; height: 0; border: none;"></iframe>
 
     <fieldset id="chart-fieldset" style="display: none;">
-        <legend>„Ich habe kein Leben“-Balkendiagramm</legend>
-        <p style="margin: 0 0 10px 0; color: #666; text-align: center;"> Deine obsessiven Tendenzen, aufgeteilt nach Fandoms (gemessen in gelesenen Wörtern):</p>
-        <div class="chart-container">
-            <canvas id="fandomChart"></canvas>
-        </div>
+        <legend>Fandom-Verteilung (Wörter)</legend>
+        <div class="chart-container"><canvas id="fandomChart"></canvas></div>
     </fieldset>
 
     <fieldset>
-        <legend>Deine digitale Bibliothek (Direkt aus dem Browser-Speicher)</legend>
+        <legend>Deine digitale Bibliothek</legend>
         <table class="ao3-table">
             <thead>
-                <tr>
-                    <th style="width: 35%;">Titel</th>
-                    <th style="width: 20%;">Autor</th>
-                    <th style="width: 15%;">Wörter</th>
-                    <th style="width: 30%;">Fandoms</th>
-                </tr>
+                <tr><th>Titel</th><th>Autor</th><th>Wörter</th><th>Fandoms</th></tr>
             </thead>
             <tbody id="library-body">
-                <tr><td colspan="4" style="text-align:center; font-style:italic; color:#888;">Noch keine Werke importiert. Füttere den Importer oben!</td></tr>
+                <tr><td colspan="4" style="text-align:center; font-style:italic; color:#888;">Noch keine Werke importiert. Nutze den Button direkt auf AO3!</td></tr>
             </tbody>
         </table>
-    </fieldset>
-
-    <fieldset>
-        <legend>Sicherheitsnetz: Daten sichern & wiederherstellen</legend>
-        <p style="margin: 0 0 15px 0; color: #666;">Da alle Daten nur in deinem aktuellen Browser liegen, kannst du hier ein Backup erstellen oder ein altes Backup laden.</p>
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <button class="btn-backup" onclick="exportBackup()">⬇️ Archiv als Datei sichern</button>
-            <div style="border-left: 1px solid #ccc; height: 25px; margin: 0 10px;"></div>
-            <button class="btn-backup" onclick="document.getElementById('file-input').click()">⬆️ Archiv aus Datei laden</button>
-            <input type="file" id="file-input" accept=".json" style="display: none;" onchange="importBackup(event)">
-        </div>
     </fieldset>
 </div>
 
 <script>
     let myLibrary = JSON.parse(localStorage.getItem("ao3_universal_library")) || [];
-    let logs = [];
     let fandomChartInstance = null;
 
-    function addLog(text) {
-        logs.push(text);
-        const logBox = document.getElementById("log-box");
-        logBox.innerText = logs.join("\n");
-        logBox.scrollTop = logBox.scrollHeight;
-    }
+    // Wir lauschen auf Daten, die das Tampermonkey-Skript rüberschickt
+    window.addEventListener("storage", (event) => {
+        if (event.key === "ao3_universal_library") {
+            myLibrary = JSON.parse(event.newValue) || [];
+            updateDashboard();
+        }
+    });
 
     function updateDashboard() {
         document.getElementById("stat-total-fics").innerText = myLibrary.length;
         let totalWords = myLibrary.reduce((sum, fic) => sum + fic.words, 0);
         document.getElementById("stat-total-words").innerText = totalWords.toLocaleString("de-DE");
-        
-        const compSub = document.getElementById("literary-comparison");
-        if (totalWords === 0) {
-            compSub.innerText = "Bereit für den Literaturnobelpreis?";
-        } else if (totalWords < 300000) {
-            compSub.innerText = "Du hast die Länge von 'Harry Potter und der Feuerkelch' erreicht.";
-        } else if (totalWords < 1000000) {
-            compSub.innerText = "Du hast die gesamte 'Herr der Ringe'-Trilogie inhaliert. Nur mit mehr Slow Burn.";
-        } else {
-            compSub.innerText = `Das entspricht ${Math.round(totalWords / 780000 * 10) / 10}x der gesamten Bibel. Gott ist verwirrt.`;
-        }
 
         if (myLibrary.length > 0) {
             let authorCounts = {};
-            myLibrary.forEach(fic => {
-                authorCounts[fic.author] = (authorCounts[fic.author] || 0) + 1;
-            });
+            myLibrary.forEach(fic => { authorCounts[fic.author] = (authorCounts[fic.author] || 0) + 1; });
             let topAuthor = Object.keys(authorCounts).reduce((a, b) => authorCounts[a] > authorCounts[b] ? a : b);
             document.getElementById("stat-top-author").innerText = `${topAuthor} (${authorCounts[topAuthor]} Fics)`;
-        } else {
-            document.getElementById("stat-top-author").innerText = "Noch niemand";
         }
 
         const tbody = document.getElementById("library-body");
-        if (myLibrary.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; font-style:italic; color:#888;">Noch keine Werke importiert.</td></tr>`;
-            document.getElementById("chart-fieldset").style.display = "none";
-            return;
-        }
+        if (myLibrary.length === 0) return;
 
-        let sortedLibrary = [...myLibrary].reverse();
-        tbody.innerHTML = sortedLibrary.map(fic => `
+        tbody.innerHTML = [...myLibrary].reverse().map(fic => `
             <tr>
                 <td><a href="${fic.url}" target="_blank">${fic.title}</a></td>
                 <td>${fic.author}</td>
@@ -202,202 +109,29 @@
         renderFandomChart();
     }
 
+    // (Die bekannte Chart.js Logik bleibt hier exakt gleich wie in deinem alten Skript)
     function renderFandomChart() {
         if (myLibrary.length === 0) return;
         document.getElementById("chart-fieldset").style.display = "block";
-
         let fandomData = {};
         myLibrary.forEach(fic => {
             let primaryFandom = fic.fandoms.split(',')[0].trim();
             fandomData[primaryFandom] = (fandomData[primaryFandom] || 0) + fic.words;
         });
-
         let sortedFandoms = Object.keys(fandomData).sort((a, b) => fandomData[b] - fandomData[a]);
-        let labels = sortedFandoms;
-        let dataPoints = sortedFandoms.map(f => fandomData[f]);
-
         const ctx = document.getElementById('fandomChart').getContext('2d');
         if (fandomChartInstance) { fandomChartInstance.destroy(); }
-
         fandomChartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Gelesene Wörter',
-                    data: dataPoints,
-                    backgroundColor: 'rgba(153, 0, 0, 0.2)',
-                    borderColor: 'rgba(153, 0, 0, 1)',
-                    borderWidth: 1
-                }]
+                labels: sortedFandoms,
+                datasets: [{ label: 'Wörter', data: sortedFandoms.map(f => fandomData[f]), backgroundColor: 'rgba(153, 0, 0, 0.2)', borderColor: 'rgba(153, 0, 0, 1)', borderWidth: 1 }]
             },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                scales: { x: { beginAtZero: true, title: { display: true, text: 'Wörter' } } },
-                plugins: { legend: { display: false } }
-            }
+            options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } } }
         });
-    }
-
-    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-    // ========================================================
-    // DIE UNZERSTÖRBARE PROXY-FREIE AUTOMATISIERUNG
-    // ========================================================
-    async function startBatchImport() {
-        const rawInput = document.getElementById("urls-input").value;
-        const urls = rawInput.split('\n').map(u => u.trim()).filter(u => u);
-
-        if (urls.length === 0) {
-            alert("Die Box ist leer. Bitte pack ein paar Links hinein!");
-            return;
-        }
-
-        document.getElementById("start-btn").disabled = true;
-        document.getElementById("progress-section").style.display = "block";
-        logs = ["[System] Wecke den Sortier-Roboter im Browser..."];
-        addLog(`[System] ${urls.length} Links in der Warteschlange gefunden.`);
-
-        let total = urls.length;
-        const iframe = document.getElementById("secret-loader");
-
-        for (let i = 0; i < total; i++) {
-            let currentUrl = urls[i];
-            let currentCount = i + 1;
-
-            let pct = Math.round((currentCount / total) * 100);
-            document.getElementById("prog-bar").style.width = pct + "%";
-            document.getElementById("prog-text").innerText = `${currentCount} / ${total} (${pct}%)`;
-            document.getElementById("status-msg").innerText = `Lese ein: Werk ${currentCount}`;
-
-            const match = currentUrl.match(/works\/(\d+)/);
-            if (!match) {
-                addLog(`[Müll] Kein gültiger AO3-Link, überspringe: ${currentUrl}`);
-                continue;
-            }
-            let normalizedUrl = `https://archiveofourown.org/works/${match[1]}`;
-
-            if (myLibrary.some(fic => fic.url === normalizedUrl)) {
-                addLog(`[Duplikat] Kenne ich schon, liegt bereits in der Schachtel: ID ${match[1]}`);
-                continue;
-            }
-
-            addLog(`[AO3] Öffne internen Tunnel für ID ${match[1]}...`);
-
-            // Wir laden die AO3 Seite direkt über ein sicheres, unsichtbares Browser-Fenster
-            let targetUrl = `${normalizedUrl}?view_adult=true&view_full_work=true`;
-            
-            let loadPromise = new Promise((resolve) => {
-                iframe.onload = () => resolve(true);
-                // Sicherheits-Timeout falls AO3 mal hängt
-                setTimeout(() => resolve(false), 8000); 
-            });
-
-            iframe.src = targetUrl;
-            await loadPromise;
-
-            // Kurze Gedenksekunde zum Rendern des Browsers
-            await sleep(1000);
-
-            try {
-                // Versuche die Daten direkt aus dem gerenderten Dokument zu fischen
-                const doc = iframe.contentDocument || iframe.contentWindow.document;
-                
-                const titleTag = doc.querySelector("h2.title");
-                if (!titleTag) {
-                    // Fallback falls Cloudflare im iframe blockiert
-                    throw new Error("Sicherheitsbarriere von AO3 aktiv.");
-                }
-
-                const title = titleTag.innerText.trim();
-                const authorTag = doc.querySelector("a[rel='author']");
-                const author = authorTag ? authorTag.innerText.trim() : "Anonymus";
-
-                const wordsTag = doc.querySelector("dd.words");
-                let words = wordsTag ? parseInt(wordsTag.innerText.replace(/,/g, "")) || 0 : 0;
-
-                const fandomTags = Array.from(doc.querySelectorAll("ul.fandom.tags li a"));
-                const fandoms = fandomTags.map(t => t.innerText.trim()).join(", ") || "Keines";
-
-                const newFic = { title, author, words, fandoms, url: normalizedUrl };
-                myLibrary.push(newFic);
-                localStorage.setItem("ao3_universal_library", JSON.stringify(myLibrary));
-
-                addLog(`[Erfolg] "${title}" sicher im Browser verstaut.`);
-                updateDashboard();
-
-            } catch (err) {
-                // FALLBACK: Falls der Browser das Auslesen im Iframe wegen Sicherheitsrichtlinien (Same-Origin) sperrt
-                // Generieren wir Dummy-Daten mit der ID, damit das Tool weiterarbeitet und keinen Absturz hinlegt
-                let title = `Werk #${match[1]}`;
-                let author = "AO3 Nutzer";
-                let words = 0;
-                let fandoms = "Archiv-Import";
-
-                const newFic = { title, author, words, fandoms, url: normalizedUrl };
-                myLibrary.push(newFic);
-                localStorage.setItem("ao3_universal_library", JSON.stringify(myLibrary));
-                
-                addLog(`[Erfolg] ID ${match[1]} als Link registriert (Metadaten-Schutz aktiv).`);
-                updateDashboard();
-            }
-
-            if (currentCount < total) {
-                addLog(`[Pause] Schone Server, warte 3 Sekunden...`);
-                await sleep(3000);
-            }
-        }
-
-        addLog("=== WARTESCHLANGE LEER. ALLES ERLEDIGT! ===");
-        document.getElementById("status-msg").innerText = "Alles ordentlich einsortiert!";
-        document.getElementById("start-btn").disabled = false;
-        document.getElementById("urls-input").value = "";
-    }
-
-    // BACKUP LOGIK
-    function exportBackup() {
-        if (myLibrary.length === 0) { alert("Deine Schachtel ist noch leer. Es gibt nichts zu sichern!"); return; }
-        const dataStr = JSON.stringify(myLibrary, null, 2);
-        const dataBlob = new Blob([dataStr], { type: "application/json" });
-        const url = URL.createObjectURL(dataBlob);
-        const downloadLink = document.createElement("a");
-        downloadLink.href = url;
-        downloadLink.download = "ao3_archiv_backup.json";
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-        URL.revokeObjectURL(url);
-    }
-
-    function importBackup(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const importedData = JSON.parse(e.target.result);
-                if (!Array.isArray(importedData)) throw new Error("Falsches Format.");
-                if (confirm(`Möchtest du ${importedData.length} Werke importieren?`)) {
-                    let neueZaehler = 0;
-                    importedData.forEach(item => {
-                        if (item.url && !myLibrary.some(fic => fic.url === item.url)) {
-                            myLibrary.push(item);
-                            neueZaehler++;
-                        }
-                    });
-                    localStorage.setItem("ao3_universal_library", JSON.stringify(myLibrary));
-                    updateDashboard();
-                    alert(`Backup geladen! ${neueZaehler} neue Werke hinzugefügt.`);
-                }
-            } catch (err) { alert("Fehler beim Lesen der Datei."); }
-            document.getElementById('file-input').value = "";
-        };
-        reader.readAsText(file);
     }
 
     updateDashboard();
 </script>
-
 </body>
 </html>
