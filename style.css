@@ -266,3 +266,32 @@ legend {
     font-style: italic; 
     color: #555; 
 }
+
+/* --- ZUSATZ FÜR INTERAKTIVE STERNE & KAPIELSPALTEN --- */
+
+.star-rating {
+    color: #ccc;
+    cursor: pointer;
+    font-size: 16px;
+    display: inline-block;
+    white-space: nowrap;
+    user-select: none;
+}
+
+/* Goldene Färbung für aktive Sterne */
+.star-rating .star.active {
+    color: #ffcc00;
+    text-shadow: 0 0 1px #cc9900;
+}
+
+/* Hover-Effekt: Der Stern unter der Maus und alle davor leuchten auf */
+.star-rating .star:hover,
+.star-rating .star:hover ~ .star {
+    color: #ffdd44;
+}
+
+/* Zusätzliches Tabellen-Styling für Kapitel (Monospace sieht bei Brüchen cleaner aus) */
+.ao3-table td:nth-child(6) {
+    font-family: monospace;
+    font-size: 12px;
+}

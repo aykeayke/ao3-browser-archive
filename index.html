@@ -4,72 +4,82 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Archive of Our Own beta - Mein universelles Browser-Archiv</title>
-    <!-- Chart.js bleibt als externes CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Unser ausgelagertes Stylesheet -->
+    <!-- Deine separate CSS-Datei (passe den Dateinamen ggf. an) -->
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
 <div class="ao3-header">
     <h1>Archive of Our Own</h1>
-    <div class="ao3-subheader">Mein unzerstörbares Browser-Archiv (Analytics Pro)</div>
+    <div class="ao3-subheader">Mein unzerstörbares Browser-Archiv (Analytics Pro v1.5)</div>
 </div>
 
 <div class="main-content">
     
+    <!-- STATISTIK-KACHELN -->
     <div class="stats-grid">
         <div class="stat-card">
-            <h4>Werke in deiner Schachtel</h4>
+            <h4>Werke in der Schachtel</h4>
             <p id="stat-total-fics">0</p>
             <div class="sub-text">Eingesammelte Trophäen</div>
         </div>
         <div class="stat-card">
-            <h4>Wörter verschlungen</h4>
+            <h4>Wörter gelesenen</h4>
             <p id="stat-total-words">0</p>
             <div id="literary-comparison" class="sub-text">-</div>
         </div>
         <div class="stat-card">
             <h4>Inoffizielle Lesezeit</h4>
             <p id="stat-reading-time">0 Std.</p>
-            <div id="reading-time-joke" class="sub-text">Schlaf wird ohnehin überbewertet.</div>
+            <div id="reading-time-joke" class="sub-text">Schlaf wird überbewertet.</div>
+        </div>
+        <div class="stat-card" style="background: #fffdf0; border-color: #ffecc0;">
+            <h4>⭐ Deine Durchschnitts-Note</h4>
+            <p id="stat-avg-rating">0.0 / 5</p>
+            <div class="sub-text" id="stat-rated-count">0 Fics bewertet</div>
         </div>
         <div class="stat-card">
-            <h4>Lieblings-Autor/in</h4>
-            <p id="stat-top-author" style="font-size: 15px; margin-top: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Noch niemand</p>
-            <div class="sub-text">Besitzt deine Seele</div>
+            <h4>Gemeinschafts-Bookmarks</h4>
+            <p id="stat-total-bookmarks">0</p>
+            <div class="sub-text">Lesezeichen auf AO3 gesamt</div>
         </div>
         <div class="stat-card" style="background: #f3fff5; border-color: #ccffdd;">
             <h4>👑 Der Kudos-König</h4>
-            <p id="stat-top-kudos" style="font-size: 14px; margin-top: 12px; color: #1b7530; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</p>
+            <p id="stat-top-kudos" style="font-size: 13px; margin-top: 12px; color: #1b7530; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</p>
             <div class="sub-text" id="stat-top-kudos-val" style="color: #1b7530; font-weight: bold;">0 Kudos</div>
+        </div>
+        <!-- Kachel für den Top-Autor (damit app.js fehlerfrei läuft) -->
+        <div class="stat-card" style="display:none;">
+            <h4>Top-Autor</h4>
+            <p id="stat-top-author">-</p>
         </div>
     </div>
 
+    <!-- DIAGRAMME -->
     <div class="charts-grid" id="charts-section" style="display: none;">
         <div class="chart-box">
-            <h3>Fandom-Verteilung (nach gelesenen Wörtern)</h3>
+            <h3>Fandom-Verteilung (nach Wörtern)</h3>
             <div class="chart-wrapper"><canvas id="fandomChart"></canvas></div>
         </div>
         <div class="chart-box" style="flex: 0 1 340px;">
-            <h3>Rating-Verteilung (Anzahl Fics)</h3>
+            <h3>Rating-Verteilung (Anzahl)</h3>
             <div class="chart-wrapper"><canvas id="ratingChart"></canvas></div>
         </div>
         <div class="chart-box">
-            <h3>Fic-Längen-Profile (Anzahl Fics)</h3>
+            <h3>Fic-Längen-Profile (Anzahl)</h3>
             <div class="chart-wrapper"><canvas id="lengthChart"></canvas></div>
         </div>
     </div>
 
+    <!-- DIGITALE BIBLIOTHEK -->
     <fieldset>
         <legend>Deine digitale Bibliothek</legend>
         
         <div class="filter-bar">
             <div class="filter-group">
                 <label for="filter-fandom">Fandom Filter</label>
-                <select id="filter-fandom">
-                    <option value="all">Alle Fandoms</option>
-                </select>
+                <select id="filter-fandom"><option value="all">Alle Fandoms</option></select>
             </div>
             <div class="filter-group">
                 <label for="filter-rating">Rating Filter</label>
@@ -92,32 +102,31 @@
             </div>
             
             <div class="filter-group" style="margin-left: auto;">
-                <button id="btn-clear-storage" class="btn-clear">
-                    🗑️ Gesamte Schachtel leeren
-                </button>
+                <button id="btn-clear-storage" class="btn-clear">🗑️ Gesamte Schachtel leeren</button>
             </div>
         </div>
 
         <table class="ao3-table">
             <thead>
                 <tr>
-                    <th id="th-title" style="width: 25%;">Titel</th>
-                    <th id="th-author" style="width: 15%;">Autor</th>
-                    <th id="th-rating" style="width: 10%;">Rating</th>
-                    <th id="th-status" style="width: 10%;">Status</th>
-                    <th id="th-words" style="width: 10%;">Wörter</th>
-                    <th id="th-kudos" style="width: 10%;">Kudos</th>
-                    <th style="width: 20%; cursor: default;">Fandoms</th>
+                    <th id="th-rating-stars" style="width: 12%;">Deine Note</th>
+                    <th id="th-title" style="width: 20%;">Titel</th>
+                    <th id="th-author" style="width: 13%;">Autor</th>
+                    <th id="th-rating" style="width: 9%;">Rating</th>
+                    <th id="th-status" style="width: 8%;">Status</th>
+                    <th id="th-chapters" style="width: 8%;">Kapitel</th>
+                    <th id="th-words" style="width: 9%;">Wörter</th>
+                    <th id="th-kudos" style="width: 8%;">Kudos</th>
+                    <th id="th-bookmarks" style="width: 8%;">Bookmarks</th>
                 </tr>
             </thead>
             <tbody id="library-body">
-                <tr><td colspan="7" style="text-align:center; font-style:italic; color:#888;">Noch keine Werke importiert.</td></tr>
+                <tr><td colspan="9" style="text-align:center; font-style:italic; color:#888;">Noch keine Werke importiert.</td></tr>
             </tbody>
         </table>
     </fieldset>
 </div>
 
-<!-- Unsere ausgelagerte Logik -->
 <script src="app.js"></script>
 </body>
 </html>

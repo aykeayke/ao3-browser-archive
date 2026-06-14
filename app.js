@@ -3,29 +3,27 @@ let chartInstances = {};
 let currentSortKey = 'none';
 let isAscending = true;
 
-// --- INITIALISIERUNG BEIM LADEN DER SEITE ---
 document.addEventListener("DOMContentLoaded", () => {
-    // Filter-Events registrieren
     document.getElementById("filter-fandom").addEventListener("change", updateDashboard);
     document.getElementById("filter-rating").addEventListener("change", updateDashboard);
     document.getElementById("filter-status").addEventListener("change", updateDashboard);
 
-    // Sortier-Events für die Spaltenüberschriften registrieren
+    document.getElementById("th-rating-stars").addEventListener("click", () => sortTable('userRating'));
     document.getElementById("th-title").addEventListener("click", () => sortTable('title'));
     document.getElementById("th-author").addEventListener("click", () => sortTable('author'));
     document.getElementById("th-rating").addEventListener("click", () => sortTable('rating'));
     document.getElementById("th-status").addEventListener("click", () => sortTable('status'));
+    document.getElementById("th-chapters").addEventListener("click", () => sortTable('chapters'));
     document.getElementById("th-words").addEventListener("click", () => sortTable('words'));
     document.getElementById("th-kudos").addEventListener("click", () => sortTable('kudos'));
+    document.getElementById("th-bookmarks").addEventListener("click", () => sortTable('bookmarks'));
 
-    // Klick-Event für den benutzerfreundlichen Lösch-Button
     document.getElementById("btn-clear-storage").addEventListener("click", clearLibraryStorage);
 
     populateFilterDropdowns();
     updateDashboard();
 });
 
-// Synchronisierung mit Tampermonkey im Hintergrund
 window.addEventListener("storage", (event) => {
     if (event.key === "ao3_universal_library") {
         myLibrary = JSON.parse(event.newValue) || [];
@@ -34,7 +32,6 @@ window.addEventListener("storage", (event) => {
     }
 });
 
-// --- HELFER-FUNKTIONEN ---
 function getRatingBadge(rating) {
     if (!rating) return `<span class="badge rating-notrated">Unbekannt</span>`;
     const r = rating.toLowerCase();
@@ -48,7 +45,6 @@ function getRatingBadge(rating) {
 function populateFilterDropdowns() {
     const fandomSelect = document.getElementById("filter-fandom");
     if (!fandomSelect) return;
-    
     const currentSelection = fandomSelect.value;
     fandomSelect.innerHTML = '<option value="all">Alle Fandoms</option>';
     
@@ -70,52 +66,82 @@ function sortTable(key) {
     updateDashboard();
 }
 
-// --- BENUTZERFREUNDLICHER HARD RESET ---
+// STERNE-GENERATOR (Erstellt klickbare HTML-Sterne)
+function generateStarHTML(currentRating, ficUrl) {
+    let starsHtml = `<div class="star-rating" data-url="${ficUrl}">`;
+    for (let i = 1; i <= 5; i++) {
+        const activeClass = i <= currentRating ? 'active' : '';
+        starsHtml += `<span class="star ${activeClass}" data-value="${i}" onclick="rateFic('${ficUrl}', ${i})">★</span>`;
+    }
+    starsHtml += `</div>`;
+    return starsHtml;
+}
+
+// SPEICHER-LOGIK FÜR DAS STERNE-RATING
+window.rateFic = function(url, ratingValue) {
+    const ficIndex = myLibrary.findIndex(f => f.url === url);
+    if (ficIndex !== -index) {
+        // Wenn man den gleichen Stern nochmal klickt, setzen wir es auf 0 zurück (optionales un-rate)
+        if (myLibrary[ficIndex].userRating === ratingValue) {
+            myLibrary[ficIndex].userRating = 0;
+        } else {
+            myLibrary[ficIndex].userRating = ratingValue;
+        }
+        
+        // Synchronisation triggern
+        localStorage.setItem("ao3_universal_library", JSON.stringify(myLibrary));
+        window.dispatchEvent(new StorageEvent('storage', {
+            key: 'ao3_universal_library',
+            newValue: JSON.stringify(myLibrary)
+        }));
+        
+        updateDashboard();
+    }
+}
+
 function clearLibraryStorage() {
-    const confirmDelete = confirm("Bist du dir ganz sicher? Damit werden alle gesammelten Fics unwiderruflich aus deinem Dashboard UND aus Tampermonkey gelöscht!");
-    
-    if (confirmDelete) {
-        // 1. Lokalen Dashboard-Speicher sofort leeren
+    if (confirm("Bist du dir ganz sicher? Damit werden alle gesammelten Fics unwiderruflich gelöscht!")) {
         localStorage.setItem("ao3_universal_library", "[]");
         myLibrary = [];
-        
-        // 2. Filter zurücksetzen
         document.getElementById("filter-fandom").value = "all";
         document.getElementById("filter-rating").value = "all";
         document.getElementById("filter-status").value = "all";
         
-        // 3. HARD RESET: Wir triggern ein simuliertes Event, das auch via Tampermonkey-Bridge spiegelt
-        // Indem wir ein leeres Array in den globalen Speicher zwingen
-        window.dispatchEvent(new StorageEvent('storage', {
-            key: 'ao3_universal_library',
-            newValue: '[]'
-        }));
-        
-        // 4. GUI direkt aktualisieren
+        window.dispatchEvent(new StorageEvent('storage', { key: 'ao3_universal_library', newValue: '[]' }));
         populateFilterDropdowns();
         updateDashboard();
-        
-        alert("Harter Reset erfolgreich! Deine Schachtel ist plattformübergreifend absolut leer. 🧼");
+        alert("Harter Reset erfolgreich! 🧼");
     }
 }
 
-// --- CORE DASHBOARD LOGIK & STATISTIKEN ---
 function updateDashboard() {
     if (!document.getElementById("stat-total-fics")) return;
 
-    // 1. Basis-Zähler befüllen
     document.getElementById("stat-total-fics").innerText = myLibrary.length;
     let totalWords = myLibrary.reduce((sum, fic) => sum + fic.words, 0);
     document.getElementById("stat-total-words").innerText = totalWords.toLocaleString("de-DE");
 
-    // Literarischer Vergleich
+    // Bookmarks summieren
+    let totalBookmarks = myLibrary.reduce((sum, fic) => sum + (fic.bookmarks || 0), 0);
+    document.getElementById("stat-total-bookmarks").innerText = totalBookmarks.toLocaleString("de-DE");
+
+    // Durchschnitts-Note berechnen
+    let ratedFics = myLibrary.filter(f => (f.userRating || 0) > 0);
+    if (ratedFics.length > 0) {
+        let avg = ratedFics.reduce((sum, f) => sum + f.userRating, 0) / ratedFics.length;
+        document.getElementById("stat-avg-rating").innerText = `${avg.toFixed(1)} / 5`;
+        document.getElementById("stat-rated-count").innerText = `${ratedFics.length} von ${myLibrary.length} bewertet`;
+    } else {
+        document.getElementById("stat-avg-rating").innerText = "0.0 / 5";
+        document.getElementById("stat-rated-count").innerText = "0 Fics bewertet";
+    }
+
     const compSub = document.getElementById("literary-comparison");
     if (totalWords === 0) compSub.innerText = "-";
     else if (totalWords < 300000) compSub.innerText = "Länger als HP und der Feuerkelch.";
     else if (totalWords < 1000000) compSub.innerText = "Die gesamte 'Herr der Ringe'-Trilogie inhaliert.";
     else compSub.innerText = `Das entspricht ${Math.round(totalWords / 780000 * 10) / 10}x der gesamten Bibel.`;
 
-    // Lesezeit berechnen (250 Wörter / Minute)
     let readingMinutes = totalWords / 250;
     let readingHours = Math.round(readingMinutes / 60);
     document.getElementById("stat-reading-time").innerText = `${readingHours.toLocaleString("de-DE")} Std.`;
@@ -123,11 +149,8 @@ function updateDashboard() {
     if (readingHours > 0) {
         let days = (readingHours / 24).toFixed(1);
         timeJoke.innerText = `Das sind ${days} Tage deines Lebens am Stück.`;
-    } else {
-        timeJoke.innerText = "Schlaf wird ohnehin überbewertet.";
     }
 
-    // Top Autor & Kudos König auswerten
     if (myLibrary.length > 0) {
         let authorCounts = {};
         myLibrary.forEach(fic => { authorCounts[fic.author] = (authorCounts[fic.author] || 0) + 1; });
@@ -143,7 +166,6 @@ function updateDashboard() {
         document.getElementById("stat-top-kudos-val").innerText = "0 Kudos";
     }
 
-    // 2. Filter-Logik
     const selectedFandom = document.getElementById("filter-fandom").value;
     const selectedRating = document.getElementById("filter-rating").value;
     const selectedStatus = document.getElementById("filter-status").value;
@@ -155,53 +177,49 @@ function updateDashboard() {
         return matchesFandom && matchesRating && matchesStatus;
     });
 
-    // 3. Spalten-Sortierungs-Logik
     if (currentSortKey !== 'none') {
         displayList.sort((a, b) => {
             let valA = a[currentSortKey] || 0; let valB = b[currentSortKey] || 0;
+            // Kapitelsortierung als Text, Rest dynamisch
+            if (currentSortKey === 'chapters') return isAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
             if (typeof valA === 'string') return isAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
             return isAscending ? valA - valB : valB - valA;
         });
     } else {
-        displayList.reverse(); // Standard: Neueste zuerst
+        displayList.reverse();
     }
 
-    // 4. Tabellen-DOM rendern
     const tbody = document.getElementById("library-body");
     if (displayList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; font-style:italic; color:#888;">Keine Werke entsprechen den Filtereinstellungen.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; font-style:italic; color:#888;">Keine Werke entsprechen den Filtereinstellungen.</td></tr>`;
         document.getElementById("charts-section").style.display = "none";
         return;
     }
 
     tbody.innerHTML = displayList.map(fic => `
         <tr>
+            <td style="text-align: center;">${generateStarHTML(fic.userRating || 0, fic.url)}</td>
             <td><a href="${fic.url}" target="_blank">${fic.title}</a></td>
             <td>${fic.author}</td>
             <td>${getRatingBadge(fic.rating)}</td>
             <td><span class="status-badge">${fic.status || "Abgeschlossen"}</span></td>
+            <td style="font-family: monospace;">${fic.chapters || "1/1"}</td>
             <td>${fic.words.toLocaleString("de-DE")}</td>
             <td>${fic.kudos ? fic.kudos.toLocaleString("de-DE") : "0"}</td>
-            <td><span style="font-size:11px; color:#555;">${fic.fandoms}</span></td>
+            <td>${fic.bookmarks ? fic.bookmarks.toLocaleString("de-DE") : "0"}</td>
         </tr>
     `).join("");
 
-    // 5. Diagramme aktualisieren
     renderAllCharts();
 }
 
-// --- RENDERING DER DREI CANVAS-DIAGRAMME ---
 function renderAllCharts() {
-    if (myLibrary.length === 0) {
-        document.getElementById("charts-section").style.display = "none";
-        return;
-    }
+    if (myLibrary.length === 0) { document.getElementById("charts-section").style.display = "none"; return; }
     document.getElementById("charts-section").style.display = "flex";
 
-    // Alte Chart-Instanzen zerstören, um Overlapping-Glitches zu verhindern
     ['fandom', 'rating', 'length'].forEach(k => { if (chartInstances[k]) chartInstances[k].destroy(); });
 
-    // A. Fandom Balkendiagramm (Top 5)
+    // Fandom Chart
     let fandomData = {};
     myLibrary.forEach(fic => {
         let primary = fic.fandoms ? fic.fandoms.split(',')[0].trim() : "Unbekannt";
@@ -215,7 +233,7 @@ function renderAllCharts() {
         options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
     });
 
-    // B. Rating Kuchendiagramm
+    // Rating Chart
     let ratingCounts = { 'Explicit': 0, 'Mature': 0, 'Teen': 0, 'General': 0, 'Not Rated': 0 };
     myLibrary.forEach(fic => {
         if (!fic.rating) { ratingCounts['Not Rated']++; return; }
@@ -235,7 +253,7 @@ function renderAllCharts() {
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 10 } } } } }
     });
 
-    // C. Fic-Längen-Profile
+    // Length Chart
     let lengths = { 'Short (<5k)': 0, 'Mid (5k-20k)': 0, 'Long (20k-100k)': 0, 'Epic (>100k)': 0 };
     myLibrary.forEach(fic => {
         if (fic.words < 5000) lengths['Short (<5k)']++;
