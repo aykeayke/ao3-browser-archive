@@ -399,6 +399,15 @@
                 <option value="50">50</option>
             </select>
         </div>
+
+        <div class="filter-group" style="margin-left: auto; display: flex; flex-direction: row; gap: 8px; align-self: flex-end;">
+            <button id="exportBtn" class="pagination-btn" title="Bibliothek als JSON sichern">📥 Exportieren</button>
+            
+            <input type="file" id="importFileInp" accept=".json" style="display: none;">
+            <button id="importBtn" class="pagination-btn" title="JSON-Backup einspielen">📤 Importieren</button>
+            
+            <button id="clearAllBtn" class="pagination-btn" style="color: var(--ao3-red); border-color: var(--ao3-border);" title="Gesamtes Archiv unwiderruflich leeren">🚨 Alles löschen</button>
+        </div>
     </div>
 
     <div class="table-container">
