@@ -13,44 +13,149 @@ let fullyFilteredList = [];
 document.addEventListener("DOMContentLoaded", () => {
     // Erkennt sofort beim Booten den im HTML gewählten Standardwert (10)
     const perPageSelect = document.getElementById("perPageSelect");
-    itemsPerPage = parseInt(perPageSelect.value, 10) || 10;
+    if (perPageSelect) {
+        itemsPerPage = parseInt(perPageSelect.value, 10) || 10;
+    }
     currentPage = 1;
 
+    // Dashboard initialisieren
     updateDashboard();
 
-    // Event-Listener für Live-Filter
-    document.getElementById("searchBar").addEventListener("input", () => { currentPage = 1; applyFilters(); });
-    document.getElementById("filterFandom").addEventListener("change", () => { currentPage = 1; applyFilters(); });
-    document.getElementById("filterStatus").addEventListener("change", () => { currentPage = 1; applyFilters(); });
+    // ========================================================
+    // EVENT-LISTENER FÜR FILTER & SUCHE
+    // ========================================================
+    const searchBar = document.getElementById("searchBar");
+    if (searchBar) searchBar.addEventListener("input", () => { currentPage = 1; applyFilters(); });
+
+    const filterFandom = document.getElementById("filterFandom");
+    if (filterFandom) filterFandom.addEventListener("change", () => { currentPage = 1; applyFilters(); });
+
+    const filterStatus = document.getElementById("filterStatus");
+    if (filterStatus) filterStatus.addEventListener("change", () => { currentPage = 1; applyFilters(); });
     
-    perPageSelect.addEventListener("change", (e) => {
-        itemsPerPage = parseInt(e.target.value, 10);
-        currentPage = 1;
-        applyFilters();
-    });
+    if (perPageSelect) {
+        perPageSelect.addEventListener("change", (e) => {
+            itemsPerPage = parseInt(e.target.value, 10);
+            currentPage = 1;
+            applyFilters();
+        });
+    }
 
-    // Pagination Button-Klicks
-    document.getElementById("prevPageBtn").addEventListener("click", () => {
-        if (currentPage > 1) {
-            currentPage--;
-            renderTablePage();
-        }
-    });
+    // ========================================================
+    // EVENT-LISTENER FÜR PAGINATION
+    // ========================================================
+    const prevPageBtn = document.getElementById("prevPageBtn");
+    if (prevPageBtn) {
+        prevPageBtn.addEventListener("click", () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTablePage();
+            }
+        });
+    }
 
-    document.getElementById("nextPageBtn").addEventListener("click", () => {
-        const maxPage = Math.ceil(fullyFilteredList.length / itemsPerPage) || 1;
-        if (currentPage < maxPage) {
-            currentPage++;
-            renderTablePage();
-        }
-    });
+    const nextPageBtn = document.getElementById("nextPageBtn");
+    if (nextPageBtn) {
+        nextPageBtn.addEventListener("click", () => {
+            const maxPage = Math.ceil(fullyFilteredList.length / itemsPerPage) || 1;
+            if (currentPage < maxPage) {
+                currentPage++;
+                renderTablePage();
+            }
+        });
+    }
 
+    // ========================================================
+    // NEU: BOMBENSICHERE EVENT-LISTENER FÜR ARCHIV-VERWALTUNG
+    // ========================================================
+    
+    // 1. Gesamten Katalog löschen
+    const clearAllBtn = document.getElementById("clearAllBtn");
+    if (clearAllBtn) {
+        clearAllBtn.addEventListener("click", () => {
+            const confirmFirst = confirm("🚨 ACHTUNG: Möchtest du wirklich deinen GESAMTEN Bibliothekskatalog unwiderruflich löschen?");
+            if (confirmFirst) {
+                const confirmSecond = confirm("Bist du dir absolut sicher? Alle gespeicherten Fics und deine Bewertungen gehen verloren!");
+                if (confirmSecond) {
+                    saveLibrary([]); // Leeres Array speichern
+                    updateDashboard();
+                    alert("Das Archiv wurde komplett geleert.");
+                }
+            }
+        });
+    }
+
+    // 2. Exportieren als .json Datei
+    const exportBtn = document.getElementById("exportBtn");
+    if (exportBtn) {
+        exportBtn.addEventListener("click", () => {
+            const library = loadLibrary();
+            if (library.length === 0) {
+                alert("Dein Archiv ist leer. Es gibt nichts zu exportieren! 🌸");
+                return;
+            }
+            
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(library, null, 2));
+            const downloadAnchor = document.createElement('a');
+            
+            const date = new Date().toISOString().split('T')[0];
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `schachtel_archiv_backup_${date}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        });
+    }
+
+    // 3. Importieren-Button triggert das versteckte File-Input
+    const importBtn = document.getElementById("importBtn");
+    const importFileInp = document.getElementById("importFileInp");
+    if (importBtn && importFileInp) {
+        importBtn.addEventListener("click", () => {
+            importFileInp.click();
+        });
+    }
+
+    // 4. Importierte Datei einlesen und verarbeiten
+    if (importFileInp) {
+        importFileInp.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const importedData = JSON.parse(event.target.result);
+                    
+                    if (Array.isArray(importedData)) {
+                        if (confirm(`Möchtest du diese ${importedData.length} Werke in dein Archiv importieren? Bestehende Daten werden dabei überschrieben.`)) {
+                            saveLibrary(importedData);
+                            updateDashboard();
+                            alert("Bibliothek erfolgreich wiederhergestellt! 🎉");
+                        }
+                    } else {
+                        alert("Fehler: Die Datei hat nicht das richtige Format für das Schachtel-Archiv.");
+                    }
+                } catch (err) {
+                    alert("Fehler beim Lesen der Datei. Stelle sicher, dass es sich um eine gültige JSON-Datei handelt.");
+                }
+                e.target.value = '';
+            };
+            reader.readAsText(file);
+        });
+    }
+
+    // Speicher-Event für Tab-Synchronisation
     window.addEventListener('storage', (e) => {
         if (e.key === 'ao3_universal_library') {
             updateDashboard();
         }
     });
 });
+
+// ========================================================
+// HILFSFUNKTIONEN (SPEICHERN, LADEN, DATENVERARBEITUNG)
+// ========================================================
 
 function loadLibrary() {
     return JSON.parse(localStorage.getItem("ao3_universal_library")) || [];
@@ -71,12 +176,10 @@ function updateDashboard() {
 function calculateStats(library) {
     const totalFics = library.length;
     let totalWords = 0;
-    let totalKudos = 0;
     let authorCounts = {};
 
     library.forEach(fic => {
         totalWords += Number(fic.words) || 0;
-        totalKudos += Number(fic.kudos) || 0;
         let author = fic.author || "Anonymous";
         if (author !== "Anonymous") {
             authorCounts[author] = (authorCounts[author] || 0) + 1;
@@ -107,16 +210,23 @@ function calculateStats(library) {
         }
     });
 
-    document.getElementById("stat-total-fics").innerText = totalFics.toLocaleString();
-    document.getElementById("stat-total-words").innerText = totalWords.toLocaleString();
-    document.getElementById("stat-reading-time").innerText = readingTimeText;
-    document.getElementById("stat-top-author").innerText = topAuthor;
+    const statTotalFics = document.getElementById("stat-total-fics");
+    const statTotalWords = document.getElementById("stat-total-words");
+    const statReadingTime = document.getElementById("stat-reading-time");
+    const statTopAuthor = document.getElementById("stat-top-author");
+
+    if (statTotalFics) statTotalFics.innerText = totalFics.toLocaleString();
+    if (statTotalWords) statTotalWords.innerText = totalWords.toLocaleString();
+    if (statReadingTime) statReadingTime.innerText = readingTimeText;
+    if (statTopAuthor) statTopAuthor.innerText = topAuthor;
 
     generateFunFact(totalWords, totalFics);
 }
 
 function generateFunFact(totalWords, totalFics) {
     const factTextEl = document.getElementById("fun-fact-text");
+    if (!factTextEl) return;
+
     if (totalFics === 0) {
         factTextEl.innerText = "Noch keine Fics in der Schachtel! Zeit, AO3 unsicher zu machen. 💕";
         return;
@@ -188,8 +298,9 @@ function generateFunFact(totalWords, totalFics) {
 
 function populateFilterDropdowns(library) {
     const fandomSelect = document.getElementById("filterFandom");
+    if (!fandomSelect) return;
+
     const currentSelection = fandomSelect.value;
-    
     fandomSelect.innerHTML = '<option value="all">Alle Fandoms</option>';
     
     let fandomSet = new Set();
@@ -213,9 +324,13 @@ function populateFilterDropdowns(library) {
 
 function applyFilters() {
     const library = loadLibrary();
-    const searchQuery = document.getElementById("searchBar").value.toLowerCase();
-    const selectedFandom = document.getElementById("filterFandom").value;
-    const selectedStatus = document.getElementById("filterStatus").value;
+    const searchBar = document.getElementById("searchBar");
+    const filterFandom = document.getElementById("filterFandom");
+    const filterStatus = document.getElementById("filterStatus");
+
+    const searchQuery = searchBar ? searchBar.value.toLowerCase() : "";
+    const selectedFandom = filterFandom ? filterFandom.value : "all";
+    const selectedStatus = filterStatus ? filterStatus.value : "all";
 
     fullyFilteredList = library.filter(fic => {
         const matchesSearch = (fic.title || '').toLowerCase().includes(searchQuery) || 
@@ -264,9 +379,10 @@ function sortTable(columnName, headerElement) {
     applyFilters();
 }
 
-// SEITENWEISES RENDERN DER ARCHIVLISTE
 function renderTablePage() {
     const tableBody = document.getElementById("libraryTableBody");
+    if (!tableBody) return;
+
     tableBody.innerHTML = "";
 
     const totalItems = fullyFilteredList.length;
@@ -280,9 +396,13 @@ function renderTablePage() {
     
     const pageItems = fullyFilteredList.slice(startIndex, endIndex);
 
-    document.getElementById("prevPageBtn").disabled = (currentPage === 1);
-    document.getElementById("nextPageBtn").disabled = (currentPage === maxPage);
-    document.getElementById("paginationInfo").innerText = `Seite ${currentPage} von ${maxPage} (${totalItems} Werke)`;
+    const prevPageBtn = document.getElementById("prevPageBtn");
+    const nextPageBtn = document.getElementById("nextPageBtn");
+    const paginationInfo = document.getElementById("paginationInfo");
+
+    if (prevPageBtn) prevPageBtn.disabled = (currentPage === 1);
+    if (nextPageBtn) nextPageBtn.disabled = (currentPage === maxPage);
+    if (paginationInfo) paginationInfo.innerText = `Seite ${currentPage} von ${maxPage} (${totalItems} Werke)`;
 
     if (pageItems.length === 0) {
         tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center; color:#666;">Keine passenden Werke gefunden. 🔍</td></tr>`;
@@ -381,9 +501,14 @@ function deleteFic(originalIndex) {
     }
 }
 
-// DIAGRAMME GENERIEREN (Fandoms mit sauberer rechter Legende)
 function buildCharts(library) {
-    // 1. Top Fandoms (Horizontal + saubere Legende rechts)
+    const fandomCanvas = document.getElementById('fandomChart');
+    const ratingCanvas = document.getElementById('ratingChart');
+    const wordLengthCanvas = document.getElementById('wordLengthChart');
+
+    if (!fandomCanvas || !ratingCanvas || !wordLengthCanvas) return;
+
+    // Fandom Chart
     let fandomCounts = {};
     library.forEach(fic => {
         if (fic.fandoms) {
@@ -396,7 +521,7 @@ function buildCharts(library) {
     let sortedFandoms = Object.entries(fandomCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
     if (fandomChartInstance) fandomChartInstance.destroy();
     
-    fandomChartInstance = new Chart(document.getElementById('fandomChart').getContext('2d'), {
+    fandomChartInstance = new Chart(fandomCanvas.getContext('2d'), {
         type: 'bar',
         data: {
             labels: sortedFandoms.map((x, index) => `#${index + 1}`), 
@@ -455,7 +580,7 @@ function buildCharts(library) {
         }
     });
 
-    // 2. Ratings-Verteilung (Doughnut mit sicherem Kachel-Padding)
+    // Ratings Chart
     let ratingCounts = {};
     library.forEach(fic => {
         let r = fic.rating || "Not Rated";
@@ -470,7 +595,7 @@ function buildCharts(library) {
     };
     let ratingLabels = Object.keys(ratingCounts);
 
-    ratingChartInstance = new Chart(document.getElementById('ratingChart').getContext('2d'), {
+    ratingChartInstance = new Chart(ratingCanvas.getContext('2d'), {
         type: 'doughnut',
         data: {
             labels: ratingLabels,
@@ -492,7 +617,7 @@ function buildCharts(library) {
         }
     });
 
-    // 3. Werke nach Wortlänge
+    // Word Length Chart
     let lengthGroups = { '< 10k': 0, '10k - 50k': 0, '50k - 100k': 0, '100k+': 0 };
     library.forEach(fic => {
         let w = Number(fic.words) || 0;
@@ -503,7 +628,7 @@ function buildCharts(library) {
     });
     if (wordLengthChartInstance) wordLengthChartInstance.destroy();
 
-    wordLengthChartInstance = new Chart(document.getElementById('wordLengthChart').getContext('2d'), {
+    wordLengthChartInstance = new Chart(wordLengthCanvas.getContext('2d'), {
         type: 'bar',
         data: {
             labels: Object.keys(lengthGroups),
