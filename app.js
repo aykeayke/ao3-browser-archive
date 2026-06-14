@@ -7,7 +7,7 @@ let currentSortDirection = 'asc';
 
 // --- NEUE GLOBALEN VARIABLEN FÜR PAGINATION ---
 let currentPage = 1;
-let itemsPerPage = 20;
+let itemsPerPage = 10;
 let fullyFilteredList = []; // Zwischenspeicher für die aktuelle Filterauswahl
 
 document.addEventListener("DOMContentLoaded", () => {
