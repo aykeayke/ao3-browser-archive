@@ -325,30 +325,30 @@
 
 <div class="container">
     <header>
-        <h1>Schachtel-Archiv: Deine digitale Bibliothek</h1>
+        <h1>Box Archive: Your Digital Library</h1>
     </header>
 
     <div class="stats-grid">
         <div class="stat-card">
-            <h3>Gespeicherte Werke</h3>
+            <h3>Saved Works</h3>
             <div id="stat-total-fics" class="value">0</div>
         </div>
         <div class="stat-card">
-            <h3>Worte Gesamt</h3>
+            <h3>Total Words</h3>
             <div id="stat-total-words" class="value">0</div>
         </div>
         <div class="stat-card" style="border-top-color: #3182ce;">
-            <h3>Geschätzte Lesezeit</h3>
-            <div id="stat-reading-time" class="value">0 Std.</div>
+            <h3>Estimated Reading Time</h3>
+            <div id="stat-reading-time" class="value">0 Hours</div>
         </div>
         <div class="stat-card" style="border-top-color: #319795;">
-            <h3>Lieblings-Autor:in</h3>
+            <h3>Favorite Author</h3>
             <div id="stat-top-author" class="value">-</div>
         </div>
     </div>
 
     <div id="fun-fact-container" class="fun-fact-card">
-        <span>✨</span> <div id="fun-fact-text">Lade Daten für süße Fun Facts...</div>
+        <span>✨</span> <div id="fun-fact-text">Load data for fun facts...</div>
     </div>
 
     <div class="charts-container">
@@ -359,13 +359,13 @@
             </div>
         </div>
         <div class="chart-card">
-            <h3>Verteilung nach Ratings</h3>
+            <h3>Distribution by Rating</h3>
             <div class="chart-wrapper">
                 <canvas id="ratingChart"></canvas>
             </div>
         </div>
         <div class="chart-card">
-            <h3>Werke nach Wortlänge</h3>
+            <h3>Works by Word Count</h3>
             <div class="chart-wrapper">
                 <canvas id="wordLengthChart"></canvas>
             </div>
@@ -374,25 +374,25 @@
 
     <div class="filter-section">
         <div class="filter-group" style="flex: 1; min-width: 200px;">
-            <label for="searchBar">Suche (Titel, Autor...)</label>
-            <input type="text" id="searchBar" placeholder="Tippen zum Suchen...">
+            <label for="searchBar">Search (Title, Author...)</label>
+            <input type="text" id="searchBar" placeholder="Type to search...">
         </div>
         <div class="filter-group">
             <label for="filterFandom">Fandom</label>
             <select id="filterFandom">
-                <option value="all">Alle Fandoms</option>
+                <option value="all">All Fandoms</option>
             </select>
         </div>
         <div class="filter-group">
             <label for="filterStatus">Status</label>
             <select id="filterStatus">
-                <option value="all">Alle</option>
-                <option value="Abgeschlossen">Abgeschlossen</option>
+                <option value="all">All</option>
+                <option value="Completed">Completed</option>
                 <option value="WIP">WIP</option>
             </select>
         </div>
         <div class="filter-group">
-            <label for="perPageSelect">Werke pro Seite</label>
+            <label for="perPageSelect">Works per Page</label>
             <select id="perPageSelect">
                 <option value="10" selected>10</option>
                 <option value="20">20</option>
@@ -401,32 +401,32 @@
         </div>
 
         <div class="filter-group" style="margin-left: auto; display: flex; flex-direction: row; gap: 8px; align-self: flex-end;">
-            <button id="exportBtn" class="pagination-btn" title="Bibliothek als JSON sichern">📥 Exportieren</button>
+            <button id="exportBtn" class="pagination-btn" title="Save library as JSON">📥 Export</button>
             
             <input type="file" id="importFileInp" accept=".json" style="display: none;">
-            <button id="importBtn" class="pagination-btn" title="JSON-Backup einspielen">📤 Importieren</button>
+            <button id="importBtn" class="pagination-btn" title="Import JSON backup">📤 Import</button>
             
-            <button id="clearAllBtn" class="pagination-btn" style="color: var(--ao3-red); border-color: var(--ao3-border);" title="Gesamtes Archiv unwiderruflich leeren">🚨 Alles löschen</button>
+            <button id="clearAllBtn" class="pagination-btn" style="color: var(--ao3-red); border-color: var(--ao3-border);" title="Empty Entire Archive">🚨 Delete Everything</button>
         </div>
     </div>
 
     <div class="table-container">
         <div class="table-header-flex">
-            <h2>Bibliothekskatalog</h2>
+            <h2>Library Catalog</h2>
         </div>
         <table id="ficTable">
             <thead>
                 <tr>
-                    <th onclick="sortTable('title', this)">Titel</th>
-                    <th onclick="sortTable('author', this)">Autor</th>
+                    <th onclick="sortTable('title', this)">Title</th>
+                    <th onclick="sortTable('author', this)">Author</th>
                     <th onclick="sortTable('fandoms', this)">Fandoms</th>
                     <th onclick="sortTable('rating', this)">Rating</th>
                     <th onclick="sortTable('status', this)">Status</th>
-                    <th onclick="sortTable('chapters', this)">Kapitel</th>
+                    <th onclick="sortTable('chapters', this)">Chapters</th>
                     <th onclick="sortTable('words', this)">Words</th>
                     <th onclick="sortTable('kudos', this)">Kudos</th>
-                    <th onclick="sortTable('userRating', this)">Deine Bewertung</th>
-                    <th>Aktionen</th>
+                    <th onclick="sortTable('userRating', this)">Your Rating</th>
+                    <th>Delete</th>
                 </tr>
             </thead>
             <tbody id="libraryTableBody">
@@ -434,9 +434,9 @@
         </table>
         
         <div class="pagination-container">
-            <button id="prevPageBtn" class="pagination-btn" disabled>« Zurück</button>
-            <span id="paginationInfo" class="pagination-info">Seite 1 von 1</span>
-            <button id="nextPageBtn" class="pagination-btn" disabled>Weiter »</button>
+            <button id="prevPageBtn" class="pagination-btn" disabled>« Back</button>
+            <span id="paginationInfo" class="pagination-info">Page 1 of 1</span>
+            <button id="nextPageBtn" class="pagination-btn" disabled>Forward »</button>
         </div>
     </div>
 </div>
