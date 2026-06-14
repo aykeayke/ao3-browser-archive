@@ -1,3 +1,4 @@
+/* --- AO3 LAYOUT & BRANDING --- */
 body { 
     font-family: "Lucida Grande", "Lucida Sans Unicode", sans-serif; 
     margin: 0; 
@@ -6,44 +7,39 @@ body {
     color: #333333; 
     font-size: 13px; 
 }
-
 .ao3-header { 
     background: #990000; 
     color: #ffffff; 
     padding: 12px 20px; 
     border-bottom: 4px solid #fff; 
 }
-
 .ao3-header h1 { 
     font-family: Georgia, serif; 
     font-size: 28px; 
     margin: 0; 
     font-weight: normal; 
 }
-
-.ao3-subheader {
+.ao3-subheader { 
     font-size: 14px; 
     color: #ffcccc; 
-    font-weight: bold;
+    font-weight: bold; 
 }
-
 .main-content { 
-    max-width: 1200px; 
+    max-width: 1300px; 
     margin: 20px auto; 
     padding: 0 20px; 
 }
 
-/* STATS GRID */
+/* STATS KACHELN */
 .stats-grid { 
     display: flex; 
     gap: 15px; 
     margin-bottom: 25px; 
     flex-wrap: wrap; 
 }
-
 .stat-card { 
     flex: 1; 
-    min-width: 220px; 
+    min-width: 200px; 
     background: #fff3f3; 
     border: 1px solid #ffcccc; 
     border-radius: 4px; 
@@ -51,7 +47,6 @@ body {
     text-align: center; 
     box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
 }
-
 .stat-card h4 { 
     margin: 0; 
     color: #666; 
@@ -59,7 +54,6 @@ body {
     font-size: 11px; 
     letter-spacing: 0.5px; 
 }
-
 .stat-card p { 
     margin: 8px 0 0 0; 
     font-family: Georgia, serif; 
@@ -67,7 +61,6 @@ body {
     font-weight: bold; 
     color: #990000; 
 }
-
 .stat-card .sub-text { 
     font-size: 11px; 
     color: #666; 
@@ -75,44 +68,13 @@ body {
     margin-top: 4px; 
 }
 
-#stat-top-author {
-    font-size: 15px; 
-    margin-top: 12px; 
-    white-space: nowrap; 
-    overflow: hidden; 
-    text-overflow: ellipsis;
-}
-
-.stat-card-kudos {
-    background: #f3fff5; 
-    border-color: #ccffdd;
-}
-
-#stat-top-kudos {
-    font-size: 14px; 
-    margin-top: 12px; 
-    color: #1b7530; 
-    white-space: nowrap; 
-    overflow: hidden; 
-    text-overflow: ellipsis;
-}
-
-.sub-text-kudos {
-    font-size: 11px;
-    margin-top: 4px;
-    font-style: italic;
-    color: #1b7530; 
-    font-weight: bold;
-}
-
-/* CHARTS */
+/* DIAGRAMME EXPORT */
 .charts-grid { 
     display: flex; 
     gap: 20px; 
     margin-bottom: 25px; 
     flex-wrap: wrap; 
 }
-
 .chart-box { 
     flex: 1; 
     min-width: 340px; 
@@ -121,7 +83,6 @@ body {
     border-radius: 4px; 
     padding: 15px; 
 }
-
 .chart-box h3 { 
     font-family: Georgia, serif; 
     color: #990000; 
@@ -130,11 +91,6 @@ body {
     border-bottom: 1px solid #eee; 
     padding-bottom: 8px; 
 }
-
-.chart-box-pie {
-    flex: 0 1 340px;
-}
-
 .chart-wrapper { 
     max-width: 100%; 
     height: 260px; 
@@ -142,7 +98,6 @@ body {
     margin: 0 auto; 
 }
 
-/* FIELDSET & FILTERS */
 fieldset { 
     border: 1px solid #ccc; 
     border-radius: 4px; 
@@ -150,7 +105,6 @@ fieldset {
     margin-bottom: 25px; 
     background: #fcfcfc; 
 }
-
 legend { 
     font-family: Georgia, serif; 
     font-size: 16px; 
@@ -159,6 +113,7 @@ legend {
     padding: 0 6px; 
 }
 
+/* FILTER LEISTE */
 .filter-bar { 
     display: flex; 
     gap: 15px; 
@@ -167,35 +122,49 @@ legend {
     padding: 10px; 
     border-radius: 4px; 
     border: 1px solid #ccc; 
+    align-items: flex-end; 
+    flex-wrap: wrap; 
 }
-
 .filter-group { 
     display: flex; 
     flex-direction: column; 
     gap: 4px; 
 }
-
 .filter-group label { 
     font-size: 11px; 
     font-weight: bold; 
     color: #444; 
 }
-
 .filter-group select { 
     padding: 4px 8px; 
     border-radius: 3px; 
     border: 1px solid #bbb; 
     font-size: 12px; 
     background: white; 
+    min-width: 140px; 
 }
 
-/* TABELLE */
+.btn-clear { 
+    background: #eaeaee; 
+    color: #900; 
+    border: 1px solid #ccc; 
+    padding: 5px 12px; 
+    border-radius: 3px; 
+    cursor: pointer; 
+    font-weight: bold; 
+    font-size: 12px; 
+}
+.btn-clear:hover { 
+    background-color: #fff1f1; 
+    border-color: #900; 
+}
+
+/* DIE DIGITALE TABELLE */
 .ao3-table { 
     width: 100%; 
     border-collapse: collapse; 
     margin-top: 10px; 
 }
-
 .ao3-table th { 
     background: #eaeaee; 
     color: #000; 
@@ -207,11 +176,9 @@ legend {
     user-select: none; 
     position: relative; 
 }
-
 .ao3-table th:hover { 
     background: #dcdcdc; 
 }
-
 .ao3-table th::after { 
     content: ' ↕'; 
     font-size: 10px; 
@@ -219,33 +186,24 @@ legend {
     position: absolute; 
     right: 8px; 
 }
-
 .ao3-table td { 
     border: 1px solid #ccc; 
     padding: 8px; 
     vertical-align: top; 
 }
-
 .ao3-table tr:nth-child(even) { 
     background: #f7f7fa; 
 }
-
 .ao3-table a { 
     color: #900; 
     font-weight: bold; 
     text-decoration: none; 
 }
-
 .ao3-table a:hover { 
     text-decoration: underline; 
 }
 
-.td-fandoms {
-    font-size: 11px; 
-    color: #555;
-}
-
-/* BADGES */
+/* AO3 INFOMARKER */
 .badge { 
     padding: 2px 6px; 
     border-radius: 3px; 
@@ -254,44 +212,41 @@ legend {
     color: white; 
     display: inline-block; 
 }
-
 .rating-explicit { background-color: #990000; }
 .rating-mature { background-color: #fe7100; }
 .rating-teen { background-color: #e2c110; color: #333; }
 .rating-general { background-color: #2ebd59; }
 .rating-notrated { background-color: #777777; }
+.status-badge { font-size: 11px; font-style: italic; color: #555; }
 
-.status-badge { 
-    font-size: 11px; 
-    font-style: italic; 
-    color: #555; 
-}
-
-/* --- ZUSATZ FÜR INTERAKTIVE STERNE & KAPIELSPALTEN --- */
-
-.star-rating {
-    color: #ccc;
-    cursor: pointer;
-    font-size: 16px;
-    display: inline-block;
-    white-space: nowrap;
-    user-select: none;
-}
-
-/* Goldene Färbung für aktive Sterne */
-.star-rating .star.active {
-    color: #ffcc00;
-    text-shadow: 0 0 1px #cc9900;
-}
-
-/* Hover-Effekt: Der Stern unter der Maus und alle davor leuchten auf */
-.star-rating .star:hover,
-.star-rating .star:hover ~ .star {
-    color: #ffdd44;
-}
-
-/* Zusätzliches Tabellen-Styling für Kapitel (Monospace sieht bei Brüchen cleaner aus) */
+/* KAPIELSPALTE FORMATE */
 .ao3-table td:nth-child(6) {
     font-family: monospace;
     font-size: 12px;
+    text-align: center;
+}
+
+/* --- OPTIMIERTES HELL LEUCHTENDES RATINGSYSTEM --- */
+.star-rating {
+    color: #e0e0e0; 
+    cursor: pointer;
+    font-size: 18px; 
+    display: inline-block;
+    white-space: nowrap;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+/* Stark leuchtendes Gelb-Gold für gesetzte Sterne */
+.star-rating .star.active {
+    color: #ffdb14;
+    text-shadow: 0 0 4px rgba(255, 219, 20, 0.6);
+}
+
+/* Hover-Effekt: Sterne fluten dynamisch von links zur Maus hin auf */
+.star-rating:hover .star {
+    color: #ffea70;
+}
+.star-rating .star:hover ~ .star {
+    color: #e0e0e0; 
 }

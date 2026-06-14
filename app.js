@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("th-chapters").addEventListener("click", () => sortTable('chapters'));
     document.getElementById("th-words").addEventListener("click", () => sortTable('words'));
     document.getElementById("th-kudos").addEventListener("click", () => sortTable('kudos'));
-    document.getElementById("th-bookmarks").addEventListener("click", () => sortTable('bookmarks'));
 
     document.getElementById("btn-clear-storage").addEventListener("click", clearLibraryStorage);
 
@@ -66,7 +65,7 @@ function sortTable(key) {
     updateDashboard();
 }
 
-// STERNE-GENERATOR (Erstellt klickbare HTML-Sterne)
+// STERNE-GENERATOR
 function generateStarHTML(currentRating, ficUrl) {
     let starsHtml = `<div class="star-rating" data-url="${ficUrl}">`;
     for (let i = 1; i <= 5; i++) {
@@ -80,15 +79,13 @@ function generateStarHTML(currentRating, ficUrl) {
 // SPEICHER-LOGIK FÜR DAS STERNE-RATING
 window.rateFic = function(url, ratingValue) {
     const ficIndex = myLibrary.findIndex(f => f.url === url);
-    if (ficIndex !== -index) {
-        // Wenn man den gleichen Stern nochmal klickt, setzen wir es auf 0 zurück (optionales un-rate)
+    if (ficIndex !== -1) {
         if (myLibrary[ficIndex].userRating === ratingValue) {
-            myLibrary[ficIndex].userRating = 0;
+            myLibrary[ficIndex].userRating = 0; // Erneuter Klick löscht die Wertung
         } else {
             myLibrary[ficIndex].userRating = ratingValue;
         }
         
-        // Synchronisation triggern
         localStorage.setItem("ao3_universal_library", JSON.stringify(myLibrary));
         window.dispatchEvent(new StorageEvent('storage', {
             key: 'ao3_universal_library',
@@ -120,10 +117,6 @@ function updateDashboard() {
     document.getElementById("stat-total-fics").innerText = myLibrary.length;
     let totalWords = myLibrary.reduce((sum, fic) => sum + fic.words, 0);
     document.getElementById("stat-total-words").innerText = totalWords.toLocaleString("de-DE");
-
-    // Bookmarks summieren
-    let totalBookmarks = myLibrary.reduce((sum, fic) => sum + (fic.bookmarks || 0), 0);
-    document.getElementById("stat-total-bookmarks").innerText = totalBookmarks.toLocaleString("de-DE");
 
     // Durchschnitts-Note berechnen
     let ratedFics = myLibrary.filter(f => (f.userRating || 0) > 0);
@@ -180,7 +173,6 @@ function updateDashboard() {
     if (currentSortKey !== 'none') {
         displayList.sort((a, b) => {
             let valA = a[currentSortKey] || 0; let valB = b[currentSortKey] || 0;
-            // Kapitelsortierung als Text, Rest dynamisch
             if (currentSortKey === 'chapters') return isAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
             if (typeof valA === 'string') return isAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
             return isAscending ? valA - valB : valB - valA;
@@ -189,24 +181,24 @@ function updateDashboard() {
         displayList.reverse();
     }
 
+    // EXAKT 8 SPALTEN IM TBODY
     const tbody = document.getElementById("library-body");
     if (displayList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; font-style:italic; color:#888;">Keine Werke entsprechen den Filtereinstellungen.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; font-style:italic; color:#888;">Keine Werke entsprechen den Filtereinstellungen.</td></tr>`;
         document.getElementById("charts-section").style.display = "none";
         return;
     }
 
     tbody.innerHTML = displayList.map(fic => `
         <tr>
-            <td style="text-align: center;">${generateStarHTML(fic.userRating || 0, fic.url)}</td>
+            <td style="text-align: center; vertical-align: middle;">${generateStarHTML(fic.userRating || 0, fic.url)}</td>
             <td><a href="${fic.url}" target="_blank">${fic.title}</a></td>
             <td>${fic.author}</td>
             <td>${getRatingBadge(fic.rating)}</td>
             <td><span class="status-badge">${fic.status || "Abgeschlossen"}</span></td>
-            <td style="font-family: monospace;">${fic.chapters || "1/1"}</td>
+            <td>${fic.chapters || "1/1"}</td>
             <td>${fic.words.toLocaleString("de-DE")}</td>
             <td>${fic.kudos ? fic.kudos.toLocaleString("de-DE") : "0"}</td>
-            <td>${fic.bookmarks ? fic.bookmarks.toLocaleString("de-DE") : "0"}</td>
         </tr>
     `).join("");
 
