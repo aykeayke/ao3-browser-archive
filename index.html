@@ -6,23 +6,46 @@
     <title>Archive of Our Own beta - Mein universelles Browser-Archiv</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: "Lucida Grande", sans-serif; margin: 0; padding: 0; background-color: #ffffff; color: #333333; font-size: 13px; }
+        body { font-family: "Lucida Grande", "Lucida Sans Unicode", sans-serif; margin: 0; padding: 0; background-color: #ffffff; color: #333333; font-size: 13px; }
         .ao3-header { background: #990000; color: #ffffff; padding: 12px 20px; border-bottom: 4px solid #fff; }
         .ao3-header h1 { font-family: Georgia, serif; font-size: 28px; margin: 0; font-weight: normal; }
-        .main-content { max-width: 1100px; margin: 20px auto; padding: 0 20px; }
+        .main-content { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        
         .stats-grid { display: flex; gap: 15px; margin-bottom: 25px; }
         .stat-card { flex: 1; background: #fff3f3; border: 1px solid #ffcccc; border-radius: 4px; padding: 15px; text-align: center; }
         .stat-card h4 { margin: 0; color: #666; text-transform: uppercase; font-size: 11px; }
         .stat-card p { margin: 8px 0 0 0; font-family: Georgia, serif; font-size: 22px; font-weight: bold; color: #990000; }
         .stat-card .sub-text { font-size: 11px; color: #666; font-style: italic; }
+        
         fieldset { border: 1px solid #ccc; border-radius: 4px; padding: 20px; margin-bottom: 25px; background: #fcfcfc; }
         legend { font-family: Georgia, serif; font-size: 16px; color: #990000; font-weight: bold; padding: 0 6px; }
-        button { padding: 6px 14px; font-size: 13px; font-weight: bold; color: #444; background: linear-gradient(to bottom, #ffffff 0%, #e1e1e1 100%); border: 1px solid #bbb; border-radius: 4px; cursor: pointer; }
+        
+        /* EXCEL-FILTER BAR */
+        .filter-bar { display: flex; gap: 15px; margin-bottom: 15px; background: #eaeaee; padding: 10px; border-radius: 4px; border: 1px solid #ccc; }
+        .filter-group { display: flex; flex-direction: column; gap: 4px; }
+        .filter-group label { font-size: 11px; font-weight: bold; color: #444; }
+        .filter-group select { padding: 4px 8px; border-radius: 3px; border: 1px solid #bbb; font-size: 12px; background: white; }
+
+        /* ERWEITERTE TABELLE */
         .ao3-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .ao3-table th { background: #eaeaee; color: #000; border: 1px solid #ccc; padding: 8px; font-size: 12px; text-align: left; }
-        .ao3-table td { border: 1px solid #ccc; padding: 8px; }
+        .ao3-table th { background: #eaeaee; color: #000; border: 1px solid #ccc; padding: 8px; font-size: 12px; text-align: left; cursor: pointer; user-select: none; position: relative; }
+        .ao3-table th:hover { background: #dcdcdc; }
+        /* Kleiner Sortier-Indikator-Pfeil */
+        .ao3-table th::after { content: ' ↕'; font-size: 10px; color: #888; position: absolute; right: 8px; }
+        .ao3-table td { border: 1px solid #ccc; padding: 8px; vertical-align: top; }
         .ao3-table tr:nth-child(even) { background: #f7f7fa; }
         .ao3-table a { color: #900; font-weight: bold; text-decoration: none; }
+        .ao3-table a:hover { text-decoration: underline; }
+        
+        /* BADGES FÜR RATINGS */
+        .badge { padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: bold; color: white; display: inline-block; }
+        .rating-explicit { background-color: #990000; }
+        .rating-mature { background-color: #fe7100; }
+        .rating-teen { background-color: #e2c110; color: #333; }
+        .rating-general { background-color: #2ebd59; }
+        .rating-notrated { background-color: #777777; }
+        
+        .status-badge { font-size: 11px; font-style: italic; color: #555; }
         .chart-container { max-width: 600px; margin: 15px auto; background: #fff; padding: 15px; border: 1px solid #ddd; border-radius: 4px; }
     </style>
 </head>
@@ -30,7 +53,7 @@
 
 <div class="ao3-header">
     <h1>Archive of Our Own</h1>
-    <div style="font-size: 14px; color: #ffcccc; font-weight: bold;">Mein unzerstörbares Browser-Archiv (User-Script Edition)</div>
+    <div style="font-size: 14px; color: #ffcccc; font-weight: bold;">Mein unzerstörbares Browser-Archiv (Smart Dashboard)</div>
 </div>
 
 <div class="main-content">
@@ -58,13 +81,51 @@
     </fieldset>
 
     <fieldset>
-        <legend>Deine digitale Bibliothek</legend>
+        <legend>Deine digitale Bibliothek (Excel-Edition)</legend>
+        
+        <!-- EXCEL-STYLE FILTERLEISTE -->
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label for="filter-fandom">Fandom Filter</label>
+                <select id="filter-fandom" onchange="updateDashboard()">
+                    <option value="all">Alle Fandoms</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-rating">Rating Filter</label>
+                <select id="filter-rating" onchange="updateDashboard()">
+                    <option value="all">Alle Ratings</option>
+                    <option value="General Audiences">General Audiences</option>
+                    <option value="Teen And Up Audiences">Teen And Up</option>
+                    <option value="Mature">Mature</option>
+                    <option value="Explicit">Explicit</option>
+                    <option value="Not Rated">Not Rated</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-status">Status Filter</label>
+                <select id="filter-status" onchange="updateDashboard()">
+                    <option value="all">Alle Stati</option>
+                    <option value="Abgeschlossen">Abgeschlossen</option>
+                    <option value="WIP">WIP</option>
+                </select>
+            </div>
+        </div>
+
         <table class="ao3-table">
             <thead>
-                <tr><th>Titel</th><th>Autor</th><th>Wörter</th><th>Fandoms</th></tr>
+                <tr>
+                    <th onclick="sortTable('title')" style="width: 25%;">Titel</th>
+                    <th onclick="sortTable('author')" style="width: 15%;">Autor</th>
+                    <th onclick="sortTable('rating')" style="width: 10%;">Rating</th>
+                    <th onclick="sortTable('status')" style="width: 10%;">Status</th>
+                    <th onclick="sortTable('words')" style="width: 10%;">Wörter</th>
+                    <th onclick="sortTable('kudos')" style="width: 10%;">Kudos</th>
+                    <th style="width: 20%; cursor: default;">Fandoms</th>
+                </tr>
             </thead>
             <tbody id="library-body">
-                <tr><td colspan="4" style="text-align:center; font-style:italic; color:#888;">Noch keine Werke importiert. Nutze den Button direkt auf AO3!</td></tr>
+                <tr><td colspan="7" style="text-align:center; font-style:italic; color:#888;">Noch keine Werke importiert.</td></tr>
             </tbody>
         </table>
     </fieldset>
@@ -73,16 +134,69 @@
 <script>
     let myLibrary = JSON.parse(localStorage.getItem("ao3_universal_library")) || [];
     let fandomChartInstance = null;
+    
+    // Globale Variablen für den Sortier-Zustand
+    let currentSortKey = 'none';
+    let isAscending = true;
 
-    // Wir lauschen auf Daten, die das Tampermonkey-Skript rüberschickt
     window.addEventListener("storage", (event) => {
         if (event.key === "ao3_universal_library") {
             myLibrary = JSON.parse(event.newValue) || [];
+            populateFilterDropdowns(); // Dropdowns neu füttern, wenn neue Fandoms reinkommen
             updateDashboard();
         }
     });
 
+    function getRatingBadge(rating) {
+        if (!rating) return `<span class="badge rating-notrated">Unbekannt</span>`;
+        const r = rating.toLowerCase();
+        if (r.includes("explicit")) return `<span class="badge rating-explicit">Explicit</span>`;
+        if (r.includes("mature")) return `<span class="badge rating-mature">Mature</span>`;
+        if (r.includes("teen")) return `<span class="badge rating-teen">Teen</span>`;
+        if (r.includes("general")) return `<span class="badge rating-general">General</span>`;
+        return `<span class="badge rating-notrated">${rating}</span>`;
+    }
+
+    // Dynamische Füllung des Fandom-Dropdowns basierend auf den vorhandenen Fics
+    function populateFilterDropdowns() {
+        const fandomSelect = document.getElementById("filter-fandom");
+        const currentSelection = fandomSelect.value;
+        
+        // Lösche alle Optionen außer der ersten ("Alle")
+        fandomSelect.innerHTML = '<option value="all">Alle Fandoms</option>';
+        
+        let uniqueFandoms = new Set();
+        myLibrary.forEach(fic => {
+            if (fic.fandoms) {
+                fic.fandoms.split(',').forEach(f => uniqueFandoms.add(f.trim()));
+            }
+        });
+
+        // Alphabetisch sortieren und einfügen
+        Array.from(uniqueFandoms).sort().forEach(fandom => {
+            const opt = document.createElement("option");
+            opt.value = fandom;
+            opt.innerText = fandom;
+            fandomSelect.appendChild(opt);
+        });
+
+        // Vorherige Auswahl wiederherstellen, falls sie noch existiert
+        fandomSelect.value = currentSelection;
+    }
+
+    // Die Excel-Sortierfunktion bei Spaltenklick
+    function sortTable(key) {
+        if (currentSortKey === key) {
+            isAscending = !isAscending; // Richtung umkehren bei erneutem Klick
+        } else {
+            currentSortKey = key;
+            isAscending = true;
+        }
+        updateDashboard();
+    }
+
     function updateDashboard() {
+        // 1. Basis-Statistiken (immer auf Basis ALLER Fics berechnen)
         document.getElementById("stat-total-fics").innerText = myLibrary.length;
         let totalWords = myLibrary.reduce((sum, fic) => sum + fic.words, 0);
         document.getElementById("stat-total-words").innerText = totalWords.toLocaleString("de-DE");
@@ -94,14 +208,51 @@
             document.getElementById("stat-top-author").innerText = `${topAuthor} (${authorCounts[topAuthor]} Fics)`;
         }
 
-        const tbody = document.getElementById("library-body");
-        if (myLibrary.length === 0) return;
+        // 2. FILTERN (Excel-Logik)
+        const selectedFandom = document.getElementById("filter-fandom").value;
+        const selectedRating = document.getElementById("filter-rating").value;
+        const selectedStatus = document.getElementById("filter-status").value;
 
-        tbody.innerHTML = [...myLibrary].reverse().map(fic => `
+        let displayList = myLibrary.filter(fic => {
+            const matchesFandom = selectedFandom === "all" || (fic.fandoms && fic.fandoms.includes(selectedFandom));
+            const matchesRating = selectedRating === "all" || (fic.rating && fic.rating.includes(selectedRating));
+            const matchesStatus = selectedStatus === "all" || (fic.status || "Abgeschlossen") === selectedStatus;
+            return matchesFandom && matchesRating && matchesStatus;
+        });
+
+        // 3. SORTIEREN (Excel-Logik)
+        if (currentSortKey !== 'none') {
+            displayList.sort((a, b) => {
+                let valA = a[currentSortKey];
+                let valB = b[currentSortKey];
+
+                // Sonderfall für Text-Sortierung (case-insensitive)
+                if (typeof valA === 'string') {
+                    return isAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                }
+                // Für Zahlen (Wörter, Kudos)
+                return isAscending ? valA - valB : valB - valA;
+            });
+        } else {
+            // Standardmäßig die neuesten Fics zuerst zeigen
+            displayList.reverse();
+        }
+
+        // 4. RENDERN
+        const tbody = document.getElementById("library-body");
+        if (displayList.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; font-style:italic; color:#888;">Keine Werke entsprechen den Filtereinstellungen.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = displayList.map(fic => `
             <tr>
                 <td><a href="${fic.url}" target="_blank">${fic.title}</a></td>
                 <td>${fic.author}</td>
+                <td>${getRatingBadge(fic.rating)}</td>
+                <td><span class="status-badge">${fic.status || "Abgeschlossen"}</span></td>
                 <td>${fic.words.toLocaleString("de-DE")}</td>
+                <td>${fic.kudos ? fic.kudos.toLocaleString("de-DE") : "0"}</td>
                 <td><span style="font-size:11px; color:#555;">${fic.fandoms}</span></td>
             </tr>
         `).join("");
@@ -109,7 +260,6 @@
         renderFandomChart();
     }
 
-    // (Die bekannte Chart.js Logik bleibt hier exakt gleich wie in deinem alten Skript)
     function renderFandomChart() {
         if (myLibrary.length === 0) return;
         document.getElementById("chart-fieldset").style.display = "block";
@@ -131,6 +281,8 @@
         });
     }
 
+    // Beim allerersten Laden einmal die Filterboxen bauen und Dashboard füllen
+    populateFilterDropdowns();
     updateDashboard();
 </script>
 </body>
