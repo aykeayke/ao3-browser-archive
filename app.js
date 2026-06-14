@@ -393,44 +393,95 @@ function deleteFic(originalIndex) {
 }
 
 // ==========================================
-// FIXIERTE & HORIZONTALE DIAGRAMME
+// OPTIMIERTES FANDOM DIAGRAMM (OHNE ABSCHNEIDEN)
 // ==========================================
-function buildCharts(library) {
-    // 1. Top Fandoms -> JETZT HORIZONTAL FÜR UNENDLICH PLATZ!
-    let fandomCounts = {};
-    library.forEach(fic => {
-        if (fic.fandoms) {
-            fic.fandoms.split(',').forEach(f => {
-                let cleanFandom = f.trim();
-                fandomCounts[cleanFandom] = (fandomCounts[cleanFandom] || 0) + 1;
-            });
-        }
-    });
-    let sortedFandoms = Object.entries(fandomCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    if (fandomChartInstance) fandomChartInstance.destroy();
-    
-    fandomChartInstance = new Chart(document.getElementById('fandomChart').getContext('2d'), {
-        type: 'bar',
-        data: {
-            labels: sortedFandoms.map(x => x[0]),
-            datasets: [{
-                label: 'Werke',
-                data: sortedFandoms.map(x => x[1]),
-                backgroundColor: ['#3182ce', '#319795', '#dd6b20', '#7b1fa2', '#e53e3e']
-            }]
-        },
-        options: { 
-            indexAxis: 'y', // <--- Macht den Chart horizontal!
-            responsive: true, 
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false } // Brauchen wir bei Achsenbeschriftung nicht
+let fandomCounts = {};
+library.forEach(fic => {
+    if (fic.fandoms) {
+        fic.fandoms.split(',').forEach(f => {
+            let cleanFandom = f.trim();
+            fandomCounts[cleanFandom] = (fandomCounts[cleanFandom] || 0) + 1;
+        });
+    }
+});
+let sortedFandoms = Object.entries(fandomCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+if (fandomChartInstance) fandomChartInstance.destroy();
+
+// Wir generieren kurze Labels (Fandom 1, Fandom 2...) für die Y-Achse, 
+// damit die echten, langen Namen komplett in die übersichtliche Legende wandern können.
+fandomChartInstance = new Chart(document.getElementById('fandomChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+        labels: sortedFandoms.map((x, index) => `#${index + 1}`), // Zeigt einfach #1, #2, #3... am Balken
+        datasets: sortedFandoms.map((x, index) => ({
+            label: x[0], // Das ist der echte, lange Fandom-Name für die Legende!
+            data: [
+                // Trick: Wir packen den Wert exakt auf die richtige Position
+                index === 0 ? x[1] : 0,
+                index === 1 ? x[1] : 0,
+                index === 2 ? x[1] : 0,
+                index === 3 ? x[1] : 0,
+                index === 4 ? x[1] : 0,
+            ],
+            backgroundColor: ['#3182ce', '#319795', '#dd6b20', '#7b1fa2', '#e53e3e'][index],
+            barPercentage: 0.8
+        }))
+    },
+    options: { 
+        indexAxis: 'y', 
+        responsive: true, 
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'right', // Die langen Namen stehen jetzt sauber rechts als Liste!
+                labels: {
+                    boxWidth: 12,
+                    font: { size: 11 },
+                    // Wenn der Text zu lang ist, schneidet Chart.js ihn in der Legende seltener ab
+                    generateLabels: function(chart) {
+                        return chart.data.datasets.map((dataset, i) => ({
+                            text: dataset.label,
+                            fillStyle: dataset.backgroundColor,
+                            hidden: false,
+                            lineCap: dataset.borderCapStyle,
+                            lineDash: dataset.borderDash,
+                            lineDashOffset: dataset.borderDashOffset,
+                            lineJoin: dataset.borderJoinStyle,
+                            lineWidth: dataset.borderWidth,
+                            strokeStyle: dataset.borderColor,
+                            pointStyle: dataset.pointStyle,
+                            datasetIndex: i
+                        }));
+                    }
+                }
             },
-            scales: { 
-                x: { beginAtZero: true, ticks: { stepSize: 1 } }
-            } 
-        }
-    });
+            tooltip: {
+                callbacks: {
+                    title: function(context) {
+                        // Zeigt beim Drüberfahren den vollen Fandom-Namen im Tooltip
+                        return context[0].dataset.label;
+                    },
+                    label: function(context) {
+                        return ` Werke: ${context.raw}`;
+                    }
+                }
+            }
+        },
+        scales: { 
+            x: { 
+                beginAtZero: true, 
+                ticks: { stepSize: 1 } 
+            },
+            y: {
+                stacked: true, // Stapelt die unsichtbaren Platzhalter-Werte
+                ticks: {
+                    font: { weight: 'bold' }
+                }
+            }
+        } 
+    }
+});
 
     // 2. Ratings-Verteilung -> MIT FIXIERTEM INNEREN PADDING GEGEN AUSBRECHEN
     let ratingCounts = {};
