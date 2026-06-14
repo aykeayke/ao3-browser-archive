@@ -644,6 +644,17 @@ function buildCharts(library) {
                 backgroundColor: ['#b2f5ea', '#4fd1c5', '#319795', '#234e52']
             }]
         },
-        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: {
+                legend: {
+                    display: false // Ausblenden der Legende ("Werke")
+                }
+            },
+            scales: { 
+                y: { beginAtZero: true, ticks: { stepSize: 1 } } 
+            } 
+        }
     });
 }
