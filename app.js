@@ -11,13 +11,20 @@ let itemsPerPage = 10;
 let fullyFilteredList = []; // Zwischenspeicher für die aktuelle Filterauswahl
 
 document.addEventListener("DOMContentLoaded", () => {
+    // 1. Zuerst den Standardwert aus dem HTML-Dropdown auslesen
+    const perPageSelect = document.getElementById("perPageSelect");
+    itemsPerPage = parseInt(perPageSelect.value, 10) || 10;
+    currentPage = 1;
+
+    // 2. Erst danach das Dashboard mit allen Daten und Filtern initialisieren
     updateDashboard();
 
+    // --- Deine bestehenden Event-Listener ---
     document.getElementById("searchBar").addEventListener("input", () => { currentPage = 1; applyFilters(); });
     document.getElementById("filterFandom").addEventListener("change", () => { currentPage = 1; applyFilters(); });
     document.getElementById("filterStatus").addEventListener("change", () => { currentPage = 1; applyFilters(); });
     
-    document.getElementById("perPageSelect").addEventListener("change", (e) => {
+    perPageSelect.addEventListener("change", (e) => {
         itemsPerPage = parseInt(e.target.value, 10);
         currentPage = 1;
         applyFilters();
