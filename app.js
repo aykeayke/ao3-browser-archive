@@ -5,21 +5,20 @@ let wordLengthChartInstance = null;
 let currentSortColumn = '';
 let currentSortDirection = 'asc';
 
-// --- NEUE GLOBALEN VARIABLEN FÜR PAGINATION ---
+// Globaler Zwischenspeicher & Seitenzählung (Startet standardmäßig mit 10)
 let currentPage = 1;
-let itemsPerPage = 10;
-let fullyFilteredList = []; // Zwischenspeicher für die aktuelle Filterauswahl
+let itemsPerPage = 10; 
+let fullyFilteredList = []; 
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Zuerst den Standardwert aus dem HTML-Dropdown auslesen
+    // Erkennt sofort beim Booten den im HTML gewählten Standardwert (10)
     const perPageSelect = document.getElementById("perPageSelect");
     itemsPerPage = parseInt(perPageSelect.value, 10) || 10;
     currentPage = 1;
 
-    // 2. Erst danach das Dashboard mit allen Daten und Filtern initialisieren
     updateDashboard();
 
-    // --- Deine bestehenden Event-Listener ---
+    // Event-Listener für Live-Filter
     document.getElementById("searchBar").addEventListener("input", () => { currentPage = 1; applyFilters(); });
     document.getElementById("filterFandom").addEventListener("change", () => { currentPage = 1; applyFilters(); });
     document.getElementById("filterStatus").addEventListener("change", () => { currentPage = 1; applyFilters(); });
@@ -110,7 +109,6 @@ function calculateStats(library) {
 
     document.getElementById("stat-total-fics").innerText = totalFics.toLocaleString();
     document.getElementById("stat-total-words").innerText = totalWords.toLocaleString();
-    document.getElementById("stat-total-kudos").innerText = totalKudos.toLocaleString();
     document.getElementById("stat-reading-time").innerText = readingTimeText;
     document.getElementById("stat-top-author").innerText = topAuthor;
 
@@ -213,9 +211,6 @@ function populateFilterDropdowns(library) {
     }
 }
 
-// ==========================================
-// FILTRATION & ZWISCHENSPEICHERUNG
-// ==========================================
 function applyFilters() {
     const library = loadLibrary();
     const searchQuery = document.getElementById("searchBar").value.toLowerCase();
@@ -252,7 +247,7 @@ function applyFilters() {
         });
     }
 
-    renderTablePage(); // Übergibt die Steuerung an den Paginator
+    renderTablePage(); 
 }
 
 function sortTable(columnName, headerElement) {
@@ -269,9 +264,7 @@ function sortTable(columnName, headerElement) {
     applyFilters();
 }
 
-// ==========================================
-// NEU: SEITENWEISES RENDERN (PAGINATION)
-// ==========================================
+// SEITENWEISES RENDERN DER ARCHIVLISTE
 function renderTablePage() {
     const tableBody = document.getElementById("libraryTableBody");
     tableBody.innerHTML = "";
@@ -279,17 +272,14 @@ function renderTablePage() {
     const totalItems = fullyFilteredList.length;
     const maxPage = Math.ceil(totalItems / itemsPerPage) || 1;
 
-    // Sicherheitscheck für Seitengrenzen
     if (currentPage > maxPage) currentPage = maxPage;
     if (currentPage < 1) currentPage = 1;
 
-    // Start- und End-Index für die aktuelle Seite berechnen
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
     
     const pageItems = fullyFilteredList.slice(startIndex, endIndex);
 
-    // UI-Buttons updaten
     document.getElementById("prevPageBtn").disabled = (currentPage === 1);
     document.getElementById("nextPageBtn").disabled = (currentPage === maxPage);
     document.getElementById("paginationInfo").innerText = `Seite ${currentPage} von ${maxPage} (${totalItems} Werke)`;
@@ -316,7 +306,6 @@ function renderTablePage() {
         else if (displayRating.includes("Mature")) ratingClass = "rating-mature";
         else if (displayRating.includes("Explicit")) ratingClass = "rating-explicit";
 
-        // Fandoms in schicke Einzel-Tags splitten, damit sie sauber umbrechen
         let fandomsHtml = "";
         if (fic.fandoms) {
             fic.fandoms.split(',').forEach(f => {
@@ -392,98 +381,81 @@ function deleteFic(originalIndex) {
     }
 }
 
-// ==========================================
-// OPTIMIERTES FANDOM DIAGRAMM (OHNE ABSCHNEIDEN)
-// ==========================================
-let fandomCounts = {};
-library.forEach(fic => {
-    if (fic.fandoms) {
-        fic.fandoms.split(',').forEach(f => {
-            let cleanFandom = f.trim();
-            fandomCounts[cleanFandom] = (fandomCounts[cleanFandom] || 0) + 1;
-        });
-    }
-});
-let sortedFandoms = Object.entries(fandomCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-if (fandomChartInstance) fandomChartInstance.destroy();
-
-// Wir generieren kurze Labels (Fandom 1, Fandom 2...) für die Y-Achse, 
-// damit die echten, langen Namen komplett in die übersichtliche Legende wandern können.
-fandomChartInstance = new Chart(document.getElementById('fandomChart').getContext('2d'), {
-    type: 'bar',
-    data: {
-        labels: sortedFandoms.map((x, index) => `#${index + 1}`), // Zeigt einfach #1, #2, #3... am Balken
-        datasets: sortedFandoms.map((x, index) => ({
-            label: x[0], // Das ist der echte, lange Fandom-Name für die Legende!
-            data: [
-                // Trick: Wir packen den Wert exakt auf die richtige Position
-                index === 0 ? x[1] : 0,
-                index === 1 ? x[1] : 0,
-                index === 2 ? x[1] : 0,
-                index === 3 ? x[1] : 0,
-                index === 4 ? x[1] : 0,
-            ],
-            backgroundColor: ['#3182ce', '#319795', '#dd6b20', '#7b1fa2', '#e53e3e'][index],
-            barPercentage: 0.8
-        }))
-    },
-    options: { 
-        indexAxis: 'y', 
-        responsive: true, 
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: true,
-                position: 'right', // Die langen Namen stehen jetzt sauber rechts als Liste!
-                labels: {
-                    boxWidth: 12,
-                    font: { size: 11 },
-                    // Wenn der Text zu lang ist, schneidet Chart.js ihn in der Legende seltener ab
-                    generateLabels: function(chart) {
-                        return chart.data.datasets.map((dataset, i) => ({
-                            text: dataset.label,
-                            fillStyle: dataset.backgroundColor,
-                            hidden: false,
-                            lineCap: dataset.borderCapStyle,
-                            lineDash: dataset.borderDash,
-                            lineDashOffset: dataset.borderDashOffset,
-                            lineJoin: dataset.borderJoinStyle,
-                            lineWidth: dataset.borderWidth,
-                            strokeStyle: dataset.borderColor,
-                            pointStyle: dataset.pointStyle,
-                            datasetIndex: i
-                        }));
-                    }
-                }
-            },
-            tooltip: {
-                callbacks: {
-                    title: function(context) {
-                        // Zeigt beim Drüberfahren den vollen Fandom-Namen im Tooltip
-                        return context[0].dataset.label;
-                    },
-                    label: function(context) {
-                        return ` Werke: ${context.raw}`;
-                    }
-                }
-            }
+// DIAGRAMME GENERIEREN (Fandoms mit sauberer rechter Legende)
+function buildCharts(library) {
+    // 1. Top Fandoms (Horizontal + saubere Legende rechts)
+    let fandomCounts = {};
+    library.forEach(fic => {
+        if (fic.fandoms) {
+            fic.fandoms.split(',').forEach(f => {
+                let cleanFandom = f.trim();
+                fandomCounts[cleanFandom] = (fandomCounts[cleanFandom] || 0) + 1;
+            });
+        }
+    });
+    let sortedFandoms = Object.entries(fandomCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    if (fandomChartInstance) fandomChartInstance.destroy();
+    
+    fandomChartInstance = new Chart(document.getElementById('fandomChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: sortedFandoms.map((x, index) => `#${index + 1}`), 
+            datasets: sortedFandoms.map((x, index) => ({
+                label: x[0], 
+                data: [
+                    index === 0 ? x[1] : 0,
+                    index === 1 ? x[1] : 0,
+                    index === 2 ? x[1] : 0,
+                    index === 3 ? x[1] : 0,
+                    index === 4 ? x[1] : 0,
+                ],
+                backgroundColor: ['#3182ce', '#319795', '#dd6b20', '#7b1fa2', '#e53e3e'][index],
+                barPercentage: 0.8
+            }))
         },
-        scales: { 
-            x: { 
-                beginAtZero: true, 
-                ticks: { stepSize: 1 } 
-            },
-            y: {
-                stacked: true, // Stapelt die unsichtbaren Platzhalter-Werte
-                ticks: {
-                    font: { weight: 'bold' }
+        options: { 
+            indexAxis: 'y', 
+            responsive: true, 
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'right',
+                    labels: {
+                        boxWidth: 12,
+                        font: { size: 11 },
+                        generateLabels: function(chart) {
+                            return chart.data.datasets.map((dataset, i) => ({
+                                text: dataset.label,
+                                fillStyle: dataset.backgroundColor,
+                                hidden: false,
+                                lineCap: dataset.borderCapStyle,
+                                lineDash: dataset.borderDash,
+                                lineDashOffset: dataset.borderDashOffset,
+                                lineJoin: dataset.borderJoinStyle,
+                                lineWidth: dataset.borderWidth,
+                                strokeStyle: dataset.borderColor,
+                                pointStyle: dataset.pointStyle,
+                                datasetIndex: i
+                            }));
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(context) { return context[0].dataset.label; },
+                        label: function(context) { return ` Werke: ${context.raw}`; }
+                    }
                 }
-            }
-        } 
-    }
-});
+            },
+            scales: { 
+                x: { beginAtZero: true, ticks: { stepSize: 1 } },
+                y: { stacked: true, ticks: { font: { weight: 'bold' } } }
+            } 
+        }
+    });
 
-    // 2. Ratings-Verteilung -> MIT FIXIERTEM INNEREN PADDING GEGEN AUSBRECHEN
+    // 2. Ratings-Verteilung (Doughnut mit sicherem Kachel-Padding)
     let ratingCounts = {};
     library.forEach(fic => {
         let r = fic.rating || "Not Rated";
@@ -510,12 +482,10 @@ fandomChartInstance = new Chart(document.getElementById('fandomChart').getContex
         options: { 
             responsive: true, 
             maintainAspectRatio: false,
-            layout: {
-                padding: { top: 10, bottom: 20, left: 10, right: 10 } // Schützt vor Ausreißen
-            },
+            layout: { padding: { top: 10, bottom: 20, left: 10, right: 10 } },
             plugins: {
                 legend: {
-                    position: 'right', // Verschiebt die Legende nach rechts für mehr Platz unten
+                    position: 'right',
                     labels: { boxWidth: 12, font: { size: 10 } }
                 }
             }

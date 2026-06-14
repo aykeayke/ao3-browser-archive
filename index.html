@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AO3 Universal Browser Archive</title>
-    <!-- Chart.js für deine Diagramme -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* ==========================================
@@ -54,9 +53,10 @@
             font-weight: normal;
         }
         
+        /* Aufgeräumtes Stats-Grid ohne Kudos */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 15px;
             margin-bottom: 20px;
         }
@@ -95,10 +95,10 @@
             gap: 10px;
         }
 
-        /* DIAGRAMME: Flexibler für responsive Inhalte */
+        /* DIAGRAMME: Sichere und responsive Wrapper gegen Ausreißen */
         .charts-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 20px;
             margin-bottom: 25px;
         }
@@ -125,7 +125,7 @@
             width: 100%;
         }
 
-        /* Filter Sektion */
+        /* Filter Sektion im edlen AO3-Grau */
         .filter-section {
             background: #eee;
             border: 1px solid var(--ao3-border);
@@ -155,13 +155,15 @@
             background-color: #fff;
             font-family: inherit;
         }
+        .filter-group select:focus, .filter-group input:focus {
+            border-color: var(--ao3-red);
+            outline: none;
+        }
 
-        /* ==========================================
-           TABELLEN-DESIGN & RESPONSIVE ANPASSUNGEN
-           ========================================== */
+        /* TABELLEN-DESIGN & REBOUND-PROTECTION */
         .table-container {
             background: var(--ao3-bg);
-            overflow-x: auto; /* Erlaubt horizontales Scrollen NUR bei extrem kleinen Bildschirmen */
+            overflow-x: auto; 
             width: 100%;
         }
         .table-header-flex {
@@ -219,10 +221,10 @@
             text-decoration: underline; 
         }
         
-        /* Fandoms fließen nun sauber um und brechen nicht mehr ab */
+        /* Fandom-Einzel-Tags für sauberen Zeilenumbruch */
         .fandom-cell {
             min-width: 150px;
-            max-width: 250px;
+            max-width: 260px;
             word-wrap: break-word;
         }
         .fandom-tag {
@@ -236,6 +238,7 @@
             color: #444;
         }
 
+        /* AO3 RATING CODE BADGES */
         .badge-rating {
             padding: 3px 6px;
             border-radius: 3px;
@@ -281,9 +284,7 @@
         }
         .delete-btn:hover { opacity: 1; filter: grayscale(0%); }
 
-        /* ==========================================
-           PAGINATION INTERFACE (AO3-STYLE BUTTONS)
-           ========================================== */
+        /* PAGINATION SCHALTFLÄCHEN (Echte AO3 Skin Buttons) */
         .pagination-container {
             display: flex;
             justify-content: center;
@@ -294,7 +295,6 @@
             border-top: 1px dashed var(--ao3-border);
         }
         .pagination-btn {
-            background: #e9e9e9;
             background: linear-gradient(to bottom, #ffffff 0%, #e9e9e9 100%);
             border: 1px solid var(--ao3-border);
             color: var(--ao3-text);
@@ -328,7 +328,6 @@
         <h1>Schachtel-Archiv: Deine digitale Bibliothek</h1>
     </header>
 
-    <!-- Statistiken-Kacheln -->
     <div class="stats-grid">
         <div class="stat-card">
             <h3>Gespeicherte Werke</h3>
@@ -348,12 +347,10 @@
         </div>
     </div>
 
-    <!-- Süße Fun Facts Sektion -->
     <div id="fun-fact-container" class="fun-fact-card">
         <span>✨</span> <div id="fun-fact-text">Lade Daten für süße Fun Facts...</div>
     </div>
 
-    <!-- Diagramme-Bereich (Jetzt mit sicheren Wrappern) -->
     <div class="charts-container">
         <div class="chart-card">
             <h3>Top Fandoms</h3>
@@ -375,7 +372,6 @@
         </div>
     </div>
 
-    <!-- Live-Filter & Suche -->
     <div class="filter-section">
         <div class="filter-group" style="flex: 1; min-width: 200px;">
             <label for="searchBar">Suche (Titel, Autor...)</label>
@@ -398,14 +394,13 @@
         <div class="filter-group">
             <label for="perPageSelect">Werke pro Seite</label>
             <select id="perPageSelect">
-    <option value="10" selected>10</option>
-    <option value="20">20</option>
-    <option value="50">50</option>
-</select>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
         </div>
     </div>
 
-    <!-- Haupttabelle -->
     <div class="table-container">
         <div class="table-header-flex">
             <h2>Bibliothekskatalog</h2>
@@ -426,11 +421,9 @@
                 </tr>
             </thead>
             <tbody id="libraryTableBody">
-                <!-- JavaScript gesteuert -->
-            </tbody>
+                </tbody>
         </table>
         
-        <!-- Süsse AO3 Pagination-Leiste -->
         <div class="pagination-container">
             <button id="prevPageBtn" class="pagination-btn" disabled>« Zurück</button>
             <span id="paginationInfo" class="pagination-info">Seite 1 von 1</span>
