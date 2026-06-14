@@ -4,64 +4,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AO3 Universal Browser Archive</title>
-    <!-- Chart.js für deine Diagramme -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* ==========================================
+           AO3 FARBPALETTE & TYPOGRAFIE
+           ========================================== */
         :root {
-            --bg-color: #f4f5f7;
-            --card-bg: #ffffff;
-            --text-color: #333333;
-            --primary-color: #990000;
-            --border-color: #e2e8f0;
+            --ao3-red: #990000;         /* Das ikonische AO3-Rot */
+            --ao3-red-hover: #660000;   /* Dunkleres Rot für Links */
+            --ao3-bg: #ffffff;          /* Weißer Hintergrund für den Inhalt */
+            --ao3-body-bg: #f4f4f4;     /* Typischer heller AO3-Hintergrundton */
+            --ao3-text: #2a2a2a;        /* Fast Schwarz für perfekten Lesekomfort */
+            --ao3-border: #cccccc;      /* Das klassische, feine AO3-Grau für Linien */
+            --ao3-light-bg: #eee;       /* Hintergrund für Header-Zellen */
+            --ao3-fact-bg: #fffbf0;     /* Sanftes Creme für die Fun Facts */
         }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            /* AO3 nutzt genau diese klassische, cleane Font-Family für maximale Lesbarkeit */
+            font-family: "Lucida Grande", "Lucida Sans Unicode", "GNU Unifont", Verdana, Helvetica, sans-serif;
+            background-color: var(--ao3-body-bg);
+            color: var(--ao3-text);
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            line-height: 1.4;
         }
+
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
+            max-width: 1350px;
+            margin: 20px auto;
+            background: var(--ao3-bg);
+            padding: 20px;
+            border: 1px solid var(--ao3-border);
+            border-radius: 5px;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
         }
+
+        /* AO3 Header-Stil mit der charakteristischen roten Linie */
         header {
-            margin-bottom: 30px;
-            border-bottom: 3px solid var(--primary-color);
-            padding-bottom: 10px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--ao3-red);
+            padding-bottom: 5px;
         }
-        h1 { margin: 0; color: var(--primary-color); font-size: 28px; }
+        h1 { 
+            margin: 0; 
+            color: var(--ao3-red); 
+            font-size: 24px; 
+            font-family: Georgia, serif; /* Serifenschrift für den edlen Archiv-Look */
+            font-weight: normal;
+        }
         
-        /* Stats Grid - 5 Kacheln inklusive Kudos, Lesezeit & Autor */
+        /* Stats Grid - Flach und elegant ohne dicke Schatten */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+            gap: 15px;
             margin-bottom: 20px;
         }
         .stat-card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-            border-left: 5px solid var(--primary-color);
-            transition: transform 0.2s;
+            background: var(--ao3-bg);
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid var(--ao3-border);
+            border-top: 3px solid var(--ao3-red); /* Rote Top-Line statt Links-Bündig */
+            text-align: center;
         }
-        .stat-card:hover { transform: translateY(-2px); }
-        .stat-card h3 { margin: 0 0 10px 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #718096; }
-        .stat-card .value { font-size: 22px; font-weight: bold; color: #1a202c; }
+        .stat-card h3 { 
+            margin: 0 0 8px 0; 
+            font-size: 11px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+            color: #555; 
+        }
+        .stat-card .value { 
+            font-size: 20px; 
+            font-weight: bold; 
+            color: var(--ao3-text); 
+            font-family: Georgia, serif;
+        }
 
-        /* Süße Fun-Facts Kachel */
+        /* Süße Fun-Facts Kachel im AO3-Skins-Look */
         .fun-fact-card {
-            background: #fffaf0;
-            border: 1px dashed #dd6b20;
-            border-left: 5px solid #dd6b20;
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            font-size: 14px;
-            color: #dd6b20;
-            font-style: italic;
+            background: var(--ao3-fact-bg);
+            border: 1px solid #e2b34c;
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            font-size: 13px;
+            color: #8a6d1c;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -72,23 +102,30 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
             gap: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
         .chart-card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-            height: 320px;
+            background: var(--ao3-bg);
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid var(--ao3-border);
+            height: 300px;
         }
-        .chart-card h3 { margin: 0 0 15px 0; color: #2d3748; font-size: 16px; }
+        .chart-card h3 { 
+            margin: 0 0 15px 0; 
+            color: var(--ao3-red); 
+            font-size: 15px; 
+            font-family: Georgia, serif;
+            border-bottom: 1px dashed var(--ao3-border);
+            padding-bottom: 5px;
+        }
 
-        /* Filter Sektion */
+        /* Filter Sektion im Stil der AO3 "Search/Filter"-Boxen */
         .filter-section {
-            background: var(--card-bg);
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            background: #eee;
+            border: 1px solid var(--ao3-border);
+            padding: 12px 15px;
+            border-radius: 4px;
             margin-bottom: 25px;
             display: flex;
             flex-wrap: wrap;
@@ -98,111 +135,147 @@
         .filter-group {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 4px;
         }
-        .filter-group label { font-size: 11px; font-weight: bold; color: #4a5568; text-transform: uppercase; }
+        .filter-group label { 
+            font-size: 11px; 
+            font-weight: bold; 
+            color: var(--ao3-text);
+        }
         .filter-group select, .filter-group input {
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 14px;
+            padding: 5px 8px;
+            border: 1px solid var(--ao3-border);
+            border-radius: 3px;
+            font-size: 13px;
             background-color: #fff;
+            font-family: inherit;
+        }
+        .filter-group select:focus, .filter-group input:focus {
+            border-color: var(--ao3-red);
+            outline: none;
         }
 
-        /* Table Styles & Sortier-Indikatoren */
+        /* ==========================================
+           AO3 TABELLEN-DESIGN (Klassischer Work-Index)
+           ========================================== */
         .table-container {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            background: var(--ao3-bg);
             overflow-x: auto;
         }
-        .table-container h2 { margin-top: 0; color: #2d3748; font-size: 18px; margin-bottom: 15px; }
+        .table-container h2 { 
+            color: var(--ao3-text); 
+            font-size: 18px; 
+            margin-bottom: 12px; 
+            font-family: Georgia, serif;
+            font-weight: normal;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
+            border: 1px solid var(--ao3-border);
         }
         th, td {
-            padding: 14px 12px;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 14px;
+            padding: 10px 10px;
+            border: 1px solid var(--ao3-border);
+            font-size: 13px;
         }
         th {
-            background-color: #f7fafc;
-            color: #4a5568;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 11px;
-            letter-spacing: 0.5px;
+            background: #e9e9e9;
+            background: linear-gradient(to bottom, #ffffff 0%, #e9e9e9 100%); /* Sanfter AO3 Gradient */
+            color: var(--ao3-text);
+            font-weight: bold;
             cursor: pointer;
             user-select: none;
             position: relative;
         }
-        th:hover { background-color: #edf2f7; color: var(--primary-color); }
-        th.sort-asc::after { content: " ▲"; font-size: 9px; color: var(--primary-color); }
-        th.sort-desc::after { content: " ▼"; font-size: 9px; color: var(--primary-color); }
+        th:hover { 
+            background: #dfdfdf; 
+            color: var(--ao3-red); 
+        }
+        th.sort-asc::after { content: " ▲"; font-size: 9px; color: var(--ao3-red); }
+        th.sort-desc::after { content: " ▼"; font-size: 9px; color: var(--ao3-red); }
         
+        /* Zebra-Streifen für die Tabelle – super typisch für AO3 Index-Listen */
+        tbody tr:nth-of-type(even) {
+            background-color: #fcfcfc;
+        }
+        tbody tr:hover {
+            background-color: #f4f4f4;
+        }
+
+        /* Links im typischen AO3-Rot */
         .fic-link {
-            color: var(--primary-color);
+            color: var(--ao3-red);
             text-decoration: none;
             font-weight: bold;
         }
-        .fic-link:hover { text-decoration: underline; }
+        .fic-link:hover { 
+            color: var(--ao3-red-hover);
+            text-decoration: underline; 
+        }
         
         .fandom-cell {
             max-width: 180px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            color: #555;
         }
 
-        /* Die schönen, bunten AO3 Ratings-Badges */
+        /* ==========================================
+           DIE ORIGINALEN AO3 RATING FARBEN
+           ========================================== */
         .badge-rating {
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 3px 6px;
+            border-radius: 3px;
             font-size: 11px;
             font-weight: bold;
             color: white;
-            text-shadow: 0 1px 1px rgba(0,0,0,0.1);
             display: inline-block;
             text-align: center;
             min-width: 110px;
+            border: 1px solid rgba(0,0,0,0.1);
         }
-        .rating-general { background-color: #2e7d32; }
-        .rating-teen { background-color: #e65100; }
-        .rating-mature { background-color: #c2185b; }
-        .rating-explicit { background-color: #990000; }
-        .rating-notrated { background-color: #718096; }
+        .rating-general { background-color: #2e7d32; } /* Grün */
+        .rating-teen { background-color: #e65100; }    /* Orange */
+        .rating-mature { background-color: #c2185b; }  /* Pink/Dunkelrot */
+        .rating-explicit { background-color: #990000; }/* AO3 Rot */
+        .rating-notrated { background-color: #718096; }/* Grau */
 
         /* Status Badges */
         .badge-status {
-            padding: 3px 6px;
-            border-radius: 4px;
+            padding: 2px 5px;
+            border-radius: 3px;
             font-size: 11px;
             color: white;
             font-weight: bold;
         }
-        .badge-status.done { background-color: #4a5568; }
-        .badge-status.wip { background-color: #dd6b20; }
+        .badge-status.done { background-color: #666666; }
+        .badge-status.wip { background-color: #990000; } /* WIPs leuchten im AO3-Rot */
         
-        /* Sterne Bewertung */
+        /* Sterne Bewertung im AO3 Gold-Braun-Ton */
         .star-rating {
-            color: #d69e2e;
+            color: #e2b34c;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 15px;
             white-space: nowrap;
         }
-        .star { margin-right: 2px; }
+        .star { margin-right: 1px; }
         
         .delete-btn {
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 16px;
-            transition: transform 0.1s;
+            font-size: 14px;
+            filter: grayscale(100%);
+            opacity: 0.6;
+            transition: opacity 0.1s;
         }
-        .delete-btn:hover { transform: scale(1.2); }
+        .delete-btn:hover { 
+            opacity: 1; 
+            filter: grayscale(0%);
+        }
     </style>
 </head>
 <body>
@@ -212,7 +285,6 @@
         <h1>Schachtel-Archiv: Deine digitale Bibliothek</h1>
     </header>
 
-    <!-- Statistiken-Kacheln (Kudos ist zurück!) -->
     <div class="stats-grid">
         <div class="stat-card">
             <h3>Gespeicherte Werke</h3>
@@ -222,26 +294,24 @@
             <h3>Worte Gesamt</h3>
             <div id="stat-total-words" class="value">0</div>
         </div>
-        <div class="stat-card" style="border-left-color: #e53e3e;">
+        <div class="stat-card" style="border-top-color: var(--ao3-red);">
             <h3>Kudos Gesamt</h3>
             <div id="stat-total-kudos" class="value">0</div>
         </div>
-        <div class="stat-card" style="border-left-color: #3182ce;">
+        <div class="stat-card" style="border-top-color: #3182ce;">
             <h3>Geschätzte Lesezeit</h3>
             <div id="stat-reading-time" class="value">0 Std.</div>
         </div>
-        <div class="stat-card" style="border-left-color: #319795;">
+        <div class="stat-card" style="border-top-color: #319795;">
             <h3>Lieblings-Autor:in</h3>
             <div id="stat-top-author" class="value">-</div>
         </div>
     </div>
 
-    <!-- Süße Fun Facts Sektion -->
     <div id="fun-fact-container" class="fun-fact-card">
         <span>✨</span> <div id="fun-fact-text">Lade Daten für süße Fun Facts...</div>
     </div>
 
-    <!-- Diagramme-Bereich -->
     <div class="charts-container">
         <div class="chart-card">
             <h3>Top Fandoms</h3>
@@ -257,7 +327,6 @@
         </div>
     </div>
 
-    <!-- Live-Filter & Suche -->
     <div class="filter-section">
         <div class="filter-group" style="flex: 1; min-width: 200px;">
             <label for="searchBar">Suche (Titel, Autor...)</label>
@@ -279,7 +348,6 @@
         </div>
     </div>
 
-    <!-- Haupttabelle (Kudos wieder sortierbar drin!) -->
     <div class="table-container">
         <h2>Bibliothekskatalog</h2>
         <table id="ficTable">
@@ -298,8 +366,7 @@
                 </tr>
             </thead>
             <tbody id="libraryTableBody">
-                <!-- JavaScript gesteuert -->
-            </tbody>
+                </tbody>
         </table>
     </div>
 </div>
