@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
             
             const date = new Date().toISOString().split('T')[0];
             downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `schachtel_archive_backup_${date}.json`);
+            downloadAnchor.setAttribute("download", `library_archive_backup_${date}.json`);
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
@@ -127,7 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             alert("Library successfully restored! 🎉");
                         }
                     } else {
-                        alert("Error: The file does not have the correct format for the Schachtel Archive.");
+                        alert("Error: The file does not have the correct format for the Library Archive.");
                     }
                 } catch (err) {
                     alert("Error reading the file. Please make sure it is a valid JSON file.");
@@ -220,7 +220,7 @@ function generateFunFact(totalWords, totalFics) {
     if (!factTextEl) return;
 
     if (totalFics === 0) {
-        factTextEl.innerText = "No fics in your Schachtel yet! Time to browse AO3. 💕";
+        factTextEl.innerText = "No fics in your library yet! Time to browse AO3. 💕";
         return;
     }
 
@@ -272,7 +272,7 @@ function generateFunFact(totalWords, totalFics) {
         let nonStopDays = Math.floor(totalHours / 24);
         facts.push(`If you read all fics back-to-back without sleeping, eating, or taking breaks, you'd be busy for ${totalDays} straight days! ☕🛋️`);
     } else if (totalHours > 0) {
-        facts.push(`You have already accumulated over ${Math.round(totalHours)} hours of pure reading time in this Schachtel. Time well spent! 🕒✨`);
+        facts.push(`You have already accumulated over ${Math.round(totalHours)} hours of pure reading time in this library. Time well spent! 🕒✨`);
     }
 
     if (totalKudos > 0) {
@@ -280,10 +280,10 @@ function generateFunFact(totalWords, totalFics) {
     }
 
     if (topAuthor && maxFics >= 2) {
-        facts.push(`Major fan potential: You have already archived ${maxFics} works by ${topAuthor} in your Schachtel! 👑`);
+        facts.push(`Major fan potential: You have already archived ${maxFics} works by ${topAuthor} in your library! 👑`);
     }
 
-    facts.push(`Your Schachtel already holds ${totalFics} masterpieces. Every single one an absolute treasure! 💎`);
+    facts.push(`Your library already holds ${totalFics} masterpieces. Every single one an absolute treasure! 💎`);
 
     const randomFact = facts[Math.floor(Math.random() * facts.length)];
     factTextEl.innerText = randomFact;
@@ -444,7 +444,7 @@ function renderTablePage() {
                 </div>
             </td>
             <td>
-                <button class="delete-btn" title="Remove from Schachtel">🗑️</button>
+                <button class="delete-btn" title="Remove from Library">🗑️</button>
             </td>
         `;
 
@@ -488,7 +488,7 @@ function rateFic(originalIndex, ratingValue) {
 
 function deleteFic(originalIndex) {
     if (originalIndex === -1) return;
-    if (confirm("Do you really want to remove this work from your Schachtel?")) {
+    if (confirm("Do you really want to remove this work from your library?")) {
         let library = loadLibrary();
         library.splice(originalIndex, 1);
         saveLibrary(library);
