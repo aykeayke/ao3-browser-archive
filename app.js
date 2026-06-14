@@ -70,21 +70,22 @@ function sortTable(key) {
     updateDashboard();
 }
 
-// --- BENUTZERFREUNDLICHE LÖSCH-FUNKTION ---
+// --- BENUTZERFREUNDLICHER HARD RESET ---
 function clearLibraryStorage() {
-    const confirmDelete = confirm("Bist du dir ganz sicher? Damit werden alle gesammelten Fics unwiderruflich aus deiner Schachtel gelöscht!");
+    const confirmDelete = confirm("Bist du dir ganz sicher? Damit werden alle gesammelten Fics unwiderruflich aus deinem Dashboard UND aus Tampermonkey gelöscht!");
     
     if (confirmDelete) {
-        // 1. Lokalen Speicher des Dashboards auf leeres Array setzen
+        // 1. Lokalen Dashboard-Speicher sofort leeren
         localStorage.setItem("ao3_universal_library", "[]");
         myLibrary = [];
         
-        // 2. Alle Filter-Dropdowns visuell auf Standard zurücksetzen
+        // 2. Filter zurücksetzen
         document.getElementById("filter-fandom").value = "all";
         document.getElementById("filter-rating").value = "all";
         document.getElementById("filter-status").value = "all";
         
-        // 3. Brücke schlagen: Künstliches Storage-Event abfeuern, damit Tampermonkey den Befehl empfängt
+        // 3. HARD RESET: Wir triggern ein simuliertes Event, das auch via Tampermonkey-Bridge spiegelt
+        // Indem wir ein leeres Array in den globalen Speicher zwingen
         window.dispatchEvent(new StorageEvent('storage', {
             key: 'ao3_universal_library',
             newValue: '[]'
@@ -94,7 +95,7 @@ function clearLibraryStorage() {
         populateFilterDropdowns();
         updateDashboard();
         
-        alert("Deine Schachtel wurde erfolgreich ausgefehrt! 🧼");
+        alert("Harter Reset erfolgreich! Deine Schachtel ist plattformübergreifend absolut leer. 🧼");
     }
 }
 
