@@ -306,34 +306,31 @@ async function startBatchImport() {
             let htmlText = "";
             let success = false;
 
-            // --- STRATEGIE 1: ALLORIGINS (ABER DIE REINE HTTPS-JSON-VARIANTE) ---
+            // --- STRATEGIE 1: ALLORIGINS (Verschlüsseltes JSON-Paket) ---
             try {
-                // Wir zwingen den Proxy, uns ein sauberes HTTPS-JSON-Objekt zu senden, das umgeht den Mixed-Content-Block
                 const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(normalizedUrl + "?view_adult=true")}`;
                 response = await fetch(proxyUrl);
                 if (response.ok) {
                     const json = await response.json();
                     htmlText = json.contents;
-                    if (htmlText && htmlText.includes("class=\"title\"")) success = true;
+                    // Wir prüfen einfach, ob überhaupt HTML-Inhalt vom Archiv zurückkam
+                    if (htmlText && htmlText.includes("archiveofourown")) success = true;
                 }
             } catch (err) {
                 // Fallback greift gleich
             }
 
-            // --- STRATEGIE 2: CODICIL CORSPROXY (STABILES HTTPS-FALLBACK) ---
+            // --- STRATEGIE 2: CORSPROXY.IO (KREUZSIDER-CHECK) ---
             if (!success) {
                 try {
-                    addLog(`[Sicherheits-Check] Tunnel 1 blockiert. Wechsle auf verschlüsselten Ersatz-Tunnel...`);
-                    // Ein reiner HTTPS-Proxy, der explizit für GitHub Pages zugelassen ist
-                    const fallbackProxy = `https://cors-anywhere.herokuapp.com/${normalizedUrl}?view_adult=true`;
-                    
-                    // Hinweis: Manche Proxys brauchen einen "Kollaborations-Klick", wir versuchen alternativ den ungezähmten 'corsproxy.io' via HTTPS
-                    const alternativeHttpsProxy = `https://corsproxy.io/?${encodeURIComponent(normalizedUrl + "?view_adult=true")}`;
+                    addLog(`[Sicherheits-Check] Tunnel 1 besetzt. Wechsle auf Ersatz-Tunnel...`);
+                    // JETZT RICHTIG: Mit korrektem ?url= Parameter für corsproxy.io
+                    const alternativeHttpsProxy = `https://corsproxy.io/?url=${encodeURIComponent(normalizedUrl + "?view_adult=true")}`;
                     
                     response = await fetch(alternativeHttpsProxy);
                     if (response.ok) {
                         htmlText = await response.text();
-                        if (htmlText && htmlText.includes("title")) success = true;
+                        if (htmlText && htmlText.includes("archiveofourown")) success = true;
                     }
                 } catch (err) {
                     addLog(`[Fehler] Auch der Ersatz-Tunnel meldet: ${err.message}`);
