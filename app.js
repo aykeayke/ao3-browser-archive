@@ -2,7 +2,6 @@ let fandomChartInstance = null;
 let ratingChartInstance = null;
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Initiales Rendern
     updateDashboard();
 
     // Event-Listener für Live-Filter
@@ -11,7 +10,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("filterStatus").addEventListener("change", applyFilters);
     document.getElementById("filterBookmark").addEventListener("change", applyFilters);
 
-    // Höre auf Echtzeit-Einspeisung aus Tampermonkey
     window.addEventListener('storage', (e) => {
         if (e.key === 'ao3_universal_library') {
             updateDashboard();
@@ -32,35 +30,70 @@ function updateDashboard() {
     calculateStats(library);
     populateFilterDropdowns(library);
     buildCharts(library);
-    renderTable(library); // Rendert anfangs die komplette Liste
+    renderTable(library);
 }
 
 // ==========================================
-// STATISTIKEN BERECHNEN
+// ERWEITERTE STATISTIKEN BERECHNEN (Witzige Stats)
 // ==========================================
 function calculateStats(library) {
     const totalFics = library.length;
     let totalWords = 0;
     let totalKudos = 0;
+    let authorCounts = {};
 
     library.forEach(fic => {
         totalWords += Number(fic.words) || 0;
         totalKudos += Number(fic.kudos) || 0;
+        
+        // Zähle Autoren für den Top-Autor
+        let author = fic.author || "Anonymous";
+        if (author !== "Anonymous") {
+            authorCounts[author] = (authorCounts[author] || 0) + 1;
+        }
     });
 
+    // 1. Lesezeit berechnen (Durchschnitt: 250 Wörter pro Minute)
+    let totalMinutes = totalWords / 250;
+    let readingTimeText = "0 Min.";
+    if (totalMinutes >= 60) {
+        let hours = Math.floor(totalMinutes / 60);
+        if (hours >= 24) {
+            let days = Math.floor(hours / 24);
+            let remainingHours = hours % 24;
+            readingTimeText = `${days} Tg. ${remainingHours} Std.`;
+        } else {
+            readingTimeText = `${hours} Std.`;
+        }
+    } else if (totalMinutes > 0) {
+        readingTimeText = `${Math.round(totalMinutes)} Min.`;
+    }
+
+    // 2. Lieblings-Autor ermitteln
+    let topAuthor = "-";
+    let maxFics = 0;
+    Object.entries(authorCounts).forEach(([auth, count]) => {
+        if (count > maxFics) {
+            maxFics = count;
+            topAuthor = `${auth} (${count} Fics)`;
+        }
+    });
+
+    // Stats in die UI schreiben
     document.getElementById("stat-total-fics").innerText = totalFics.toLocaleString();
     document.getElementById("stat-total-words").innerText = totalWords.toLocaleString();
     document.getElementById("stat-total-kudos").innerText = totalKudos.toLocaleString();
+    document.getElementById("stat-reading-time").innerText = readingTimeText;
+    document.getElementById("stat-top-author").innerText = topAuthor;
 }
 
 // ==========================================
-// FILTER-DROPDOWNS DYNAMISCH BEFÜLLEN
+// FILTER-DROPDOWNS BEFÜLLEN
 // ==========================================
 function populateFilterDropdowns(library) {
     const fandomSelect = document.getElementById("filterFandom");
     const currentSelection = fandomSelect.value;
     
-    // Setzt das Dropdown zurück, behält aber das "Alle" Label
     fandomSelect.innerHTML = '<option value="all">Alle Fandoms</option>';
     
     let fandomSet = new Set();
@@ -77,15 +110,11 @@ function populateFilterDropdowns(library) {
         fandomSelect.appendChild(opt);
     });
 
-    // Stellt die vorherige Auswahl wieder her, falls sie noch existiert
     if (fandomSet.has(currentSelection)) {
         fandomSelect.value = currentSelection;
     }
 }
 
-// ==========================================
-// FILTRATIONSLOGIK (Live-Ausführung)
-// ==========================================
 function applyFilters() {
     const library = loadLibrary();
     const searchQuery = document.getElementById("searchBar").value.toLowerCase();
@@ -112,10 +141,9 @@ function applyFilters() {
 }
 
 // ==========================================
-// DIAGRAMME GENERIEREN (Chart.js)
+// BUNTES BILDEN DER DIAGRAMME
 // ==========================================
 function buildCharts(library) {
-    // 1. Daten für Fandom-Chart vorbereiten
     let fandomCounts = {};
     library.forEach(fic => {
         if (fic.fandoms) {
@@ -126,10 +154,7 @@ function buildCharts(library) {
         }
     });
     
-    let sortedFandoms = Object.entries(fandomCounts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5); // Zeige Top 5
-
+    let sortedFandoms = Object.entries(fandomCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
     let fandomLabels = sortedFandoms.map(x => x[0]);
     let fandomData = sortedFandoms.map(x => x[1]);
 
@@ -143,7 +168,8 @@ function buildCharts(library) {
             datasets: [{
                 label: 'Werke',
                 data: fandomData,
-                backgroundColor: '#990000',
+                // Bunte, harmonische Farben für die Balken
+                backgroundColor: ['#3182ce', '#319795', '#dd6b20', '#7b1fa2', '#e53e3e'],
                 borderWidth: 0
             }]
         },
@@ -154,7 +180,6 @@ function buildCharts(library) {
         }
     });
 
-    // 2. Daten für Ratings-Chart vorbereiten
     let ratingCounts = {};
     library.forEach(fic => {
         let r = fic.rating || "Not Rated";
@@ -163,14 +188,28 @@ function buildCharts(library) {
 
     if (ratingChartInstance) ratingChartInstance.destroy();
 
+    // Zuordnung für bunte AO3-Doughnut-Farben
+    const ratingColors = {
+        'General Audiences': '#2e7d32',
+        'General': '#2e7d32',
+        'Teen And Up Audiences': '#e65100',
+        'Teen': '#e65100',
+        'Mature': '#c2185b',
+        'Explicit': '#990000',
+        'Not Rated': '#718096'
+    };
+    
+    let labels = Object.keys(ratingCounts);
+    let colors = labels.map(l => ratingColors[l] || '#4a5568');
+
     const ctxRating = document.getElementById('ratingChart').getContext('2d');
     ratingChartInstance = new Chart(ctxRating, {
         type: 'doughnut',
         data: {
-            labels: Object.keys(ratingCounts),
+            labels: labels,
             datasets: [{
                 data: Object.values(ratingCounts),
-                backgroundColor: ['#990000', '#2e7d32', '#f57c00', '#0288d1', '#7b1fa2', '#616161']
+                backgroundColor: colors
             }]
         },
         options: {
@@ -181,7 +220,7 @@ function buildCharts(library) {
 }
 
 // ==========================================
-// TABELLE GENERIEREN
+// TABELLE RENDERN (Mit bunten Klassen)
 // ==========================================
 function renderTable(filteredLibrary) {
     const tableBody = document.getElementById("libraryTableBody");
@@ -192,22 +231,29 @@ function renderTable(filteredLibrary) {
         return;
     }
 
-    // Wir brauchen den originalen Index aus der Gesamtbibliothek zum Löschen/Bewerten
     const fullLibrary = loadLibrary();
 
     filteredLibrary.forEach((fic) => {
-        // Findet den echten Index im Hauptspeicher
         const originalIndex = fullLibrary.findIndex(f => f.url === fic.url);
-
         const tr = document.createElement("tr");
+        
         const bookmarkStatus = fic.isBookmark || "Nein";
         const bookmarkBadge = bookmarkStatus === "Ja" ? "🔖 Ja" : "❌ Nein";
+
+        // CSS-Klassen-Mapper für das Rating-Feld
+        let ratingClass = "rating-notrated";
+        let displayRating = fic.rating || "Not Rated";
+        
+        if (displayRating.includes("General")) ratingClass = "rating-general";
+        else if (displayRating.includes("Teen")) ratingClass = "rating-teen";
+        else if (displayRating.includes("Mature")) ratingClass = "rating-mature";
+        else if (displayRating.includes("Explicit")) ratingClass = "rating-explicit";
 
         tr.innerHTML = `
             <td><a href="${fic.url}" target="_blank" class="fic-link">${fic.title}</a></td>
             <td>${fic.author || 'Anonymous'}</td>
             <td class="fandom-cell" title="${fic.fandoms || ''}">${fic.fandoms || 'Unbekannt'}</td>
-            <td><span class="badge-rating">${fic.rating || 'Not Rated'}</span></td>
+            <td><span class="badge-rating ${ratingClass}">${displayRating}</span></td>
             <td><span class="badge-status ${fic.status === 'WIP' ? 'wip' : 'done'}">${fic.status || 'Abgeschlossen'}</span></td>
             <td>${fic.chapters || '1/1'}</td>
             <td>${(Number(fic.words) || 0).toLocaleString()}</td>
@@ -223,7 +269,6 @@ function renderTable(filteredLibrary) {
             </td>
         `;
 
-        // Event-Listener für Bewertung
         const starContainer = tr.querySelector('.star-rating');
         starContainer.addEventListener('click', (e) => {
             if (e.target.classList.contains('star')) {
@@ -232,7 +277,6 @@ function renderTable(filteredLibrary) {
             }
         });
 
-        // Event-Listener für Löschen
         const deleteButton = tr.querySelector('.delete-btn');
         deleteButton.addEventListener('click', () => {
             deleteFic(originalIndex);
@@ -261,9 +305,7 @@ function rateFic(originalIndex, ratingValue) {
     }
     
     saveLibrary(library);
-    // Behalte aktive Filter beim Neurendern bei
     applyFilters();
-    // Update die Charts falls nötig
     buildCharts(library);
 }
 
