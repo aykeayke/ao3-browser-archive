@@ -66,10 +66,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ========================================================
-    // NEU: BOMBENSICHERE EVENT-LISTENER FÜR ARCHIV-VERWALTUNG
+    // EVENT-LISTENER FÜR ARCHIV-VERWALTUNG
     // ========================================================
     
-    // 1. Gesamten Katalog löschen
+    // 1. Gesamten Katalog löschen (inkl. Signal für Tampermonkey)
     const clearAllBtn = document.getElementById("clearAllBtn");
     if (clearAllBtn) {
         clearAllBtn.addEventListener("click", () => {
@@ -77,7 +77,13 @@ document.addEventListener("DOMContentLoaded", () => {
             if (confirmFirst) {
                 const confirmSecond = confirm("Bist du dir absolut sicher? Alle gespeicherten Fics und deine Bewertungen gehen verloren!");
                 if (confirmSecond) {
-                    saveLibrary([]); // Leeres Array speichern
+                    // Lokalen Speicher leeren
+                    saveLibrary([]); 
+                    
+                    // Signal für das Tampermonkey-Skript setzen
+                    localStorage.setItem("ao3_clear_central_storage", "true");
+                    
+                    // Oberfläche sofort aktualisieren
                     updateDashboard();
                     alert("Das Archiv wurde komplett geleert.");
                 }
