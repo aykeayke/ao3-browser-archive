@@ -93,12 +93,50 @@ function generateFunFact(totalWords, totalFics) {
         return;
     }
 
-    const hp4 = 190637;   // HP und der Feuerkelch
-    const lotr = 473000;  // Herr der Ringe (Gesamt)
-
-    let facts = [];
+    // --- DEINE ERWEITERTEN STATISTIK-WERTE RECHNERISCH ERMITTELN ---
+    const library = loadLibrary();
     
-    if (totalWords > lotr) {
+    // 1. Kudos & Autoren berechnen
+    let totalKudos = 0;
+    let authorCounts = {};
+    library.forEach(fic => {
+        totalKudos += Number(fic.kudos) || 0;
+        let author = fic.author || "Anonymous";
+        if (author !== "Anonymous") {
+            authorCounts[author] = (authorCounts[author] || 0) + 1;
+        }
+    });
+
+    // 2. Top-Autor herausfinden
+    let topAuthor = "";
+    let maxFics = 0;
+    Object.entries(authorCounts).forEach(([auth, count]) => {
+        if (count > maxFics) {
+            maxFics = count;
+            topAuthor = auth;
+        }
+    });
+
+    // 3. Reine Lesezeit in Stunden/Tagen ermitteln
+    let totalMinutes = totalWords / 250;
+    let totalHours = totalMinutes / 60;
+    let totalDays = (totalHours / 24).toFixed(1);
+
+    // --- VERGLEICHS-MEILENSTEINE (Wortzahlen) ---
+    const hp4 = 190637;       // HP und der Feuerkelch
+    const lotr = 473000;      // Herr der Ringe (Gesamt)
+    const warAndPeace = 587287; // Krieg und Frieden (Klassiker-Endgegner)
+
+    // Das Array, in dem wir alle gültigen Fakten sammeln
+    let facts = [];
+
+    // ==========================================
+    // KATEGORIE 1: WORTZAHL-VERGLEICHE
+    // ==========================================
+    if (totalWords > warAndPeace) {
+        let timesWar = (totalWords / warAndPeace).toFixed(1);
+        facts.push(`Du liest in einer eigenen Liga: Deine Wortzahl entspricht dem Mammut-Klassiker „Krieg und Frieden“ – und zwar ganze ${timesWar}x! 🏛️📚`);
+    } else if (totalWords > lotr) {
         let timesLotr = (totalWords / lotr).toFixed(1);
         facts.push(`Du hast so viele Wörter gelesen, dass du die gesamte „Der Herr der Ringe“-Trilogie locker ${timesLotr}x hättest durchschmökern können! 🧙‍♂️✨`);
     } else if (totalWords > hp4) {
@@ -106,11 +144,40 @@ function generateFunFact(totalWords, totalFics) {
         facts.push(`Das sind so viele Wörter, dass du „Harry Potter und der Feuerkelch“ einfach ${timesHp}x komplett gelesen hast! ⚡🏆`);
     } else {
         let percentHp = Math.round((totalWords / hp4) * 100);
-        facts.push(`Damit hast du schon ganze ${percentHp}% von „Harry Potter und der Feuerkelch“ geschafft. Weiter geht's! 📖`);
+        facts.push(`Damit hast du schon ganze ${percentHp}% der Wortzahl von „Harry Potter und der Feuerkelch“ geschafft. Weiter geht's! 📖`);
     }
 
+    // ==========================================
+    // KATEGORIE 2: REINE LESEZEIT
+    // ==========================================
+    if (totalHours >= 24) {
+        facts.push(`Würdest du alle Fics ohne Pause, Schlafen oder Essen hintereinander weglesen, wärst du ganze ${totalDays} Tage am Stück beschäftigt! ☕🛋️`);
+    } else if (totalHours > 0) {
+        facts.push(`Du hast bereits über ${Math.round(totalHours)} Stunden reine Lesezeit in dieser Schachtel angesammelt. Zeit gut investiert! 🕒✨`);
+    }
+
+    // ==========================================
+    // KATEGORIE 3: KUDOS-LIEBE
+    // ==========================================
+    if (totalKudos > 0) {
+        facts.push(`Du hast auf AO3 insgesamt schon ${totalKudos.toLocaleString()} Kudos hinterlassen. Danke, dass du den Autor:innen so viel Liebe schenkst! ❤️ Knopf gedrückt!`);
+    }
+
+    // ==========================================
+    // KATEGORIE 4: AUTOREN-HYPES
+    // ==========================================
+    if (topAuthor && maxFics >= 2) {
+        facts.push(`Großes Fangirl-Potenzial: Von ${topAuthor} hast du schon ${maxFics} Werke in deiner Schachtel archiviert! 👑`);
+    }
+
+    // ==========================================
+    // KATEGORIE 5: WERKE-LOB
+    // ==========================================
     facts.push(`Deine Schachtel beherbergt bereits ${totalFics} Meisterwerke. Jedes einzelne davon ein absoluter Schatz! 💎`);
 
+
+    // --- ZUFÄLLIGE AUSWAHL ---
+    // Der Code pickt sich nun blind einen der oben befüllten, passenden Sprüche heraus
     const randomFact = facts[Math.floor(Math.random() * facts.length)];
     factTextEl.innerText = randomFact;
 }
