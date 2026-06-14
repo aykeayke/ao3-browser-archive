@@ -306,31 +306,37 @@ async function startBatchImport() {
             let htmlText = "";
             let success = false;
 
-            // --- STRATEGIE 1: ALLINORIGIN PROXY ---
+            // --- STRATEGIE 1: ALLORIGINS (ABER DIE REINE HTTPS-JSON-VARIANTE) ---
             try {
+                // Wir zwingen den Proxy, uns ein sauberes HTTPS-JSON-Objekt zu senden, das umgeht den Mixed-Content-Block
                 const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(normalizedUrl + "?view_adult=true")}`;
                 response = await fetch(proxyUrl);
                 if (response.ok) {
                     const json = await response.json();
                     htmlText = json.contents;
-                    if (htmlText) success = true;
+                    if (htmlText && htmlText.includes("class=\"title\"")) success = true;
                 }
             } catch (err) {
-                // Erster Proxy fehlgeschlagen, wir protokollieren es nicht mal groß, sondern versuchen sofort den nächsten
+                // Fallback greift gleich
             }
 
-            // --- STRATEGIE 2: THINGPROXY (FALLBACK) ---
+            // --- STRATEGIE 2: CODICIL CORSPROXY (STABILES HTTPS-FALLBACK) ---
             if (!success) {
                 try {
-                    addLog(`[Proxy-Schluckauf] Erster Tunnel blockiert. Versuche Ersatz-Tunnel...`);
-                    const fallbackProxy = `https://thingproxy.freeboard.io/fetch/${normalizedUrl}?view_adult=true`;
-                    response = await fetch(fallbackProxy);
+                    addLog(`[Sicherheits-Check] Tunnel 1 blockiert. Wechsle auf verschlüsselten Ersatz-Tunnel...`);
+                    // Ein reiner HTTPS-Proxy, der explizit für GitHub Pages zugelassen ist
+                    const fallbackProxy = `https://cors-anywhere.herokuapp.com/${normalizedUrl}?view_adult=true`;
+                    
+                    // Hinweis: Manche Proxys brauchen einen "Kollaborations-Klick", wir versuchen alternativ den ungezähmten 'corsproxy.io' via HTTPS
+                    const alternativeHttpsProxy = `https://corsproxy.io/?${encodeURIComponent(normalizedUrl + "?view_adult=true")}`;
+                    
+                    response = await fetch(alternativeHttpsProxy);
                     if (response.ok) {
                         htmlText = await response.text();
-                        if (htmlText) success = true;
+                        if (htmlText && htmlText.includes("title")) success = true;
                     }
                 } catch (err) {
-                    addLog(`[Fehler] Auch der Ersatz-Tunnel streikt: ${err.message}`);
+                    addLog(`[Fehler] Auch der Ersatz-Tunnel meldet: ${err.message}`);
                 }
             }
 
@@ -366,11 +372,11 @@ async function startBatchImport() {
                     }
 
                 } catch (err) {
-                    addLog(`[Parser-Fehler] Inhalt unvollständig: ${err.message}`);
+                    addLog(`[Parser-Fehler] Inhalt unvollständig oder AO3-Schutz aktiv: ${err.message}`);
                     if (currentCount < total) await sleep(3000);
                 }
             } else {
-                addLog(`[Fehler] Werk ${match[1]} komplett blockiert. Später nochmal versuchen!`);
+                addLog(`[Fehler] Werk ${match[1]} konnte über keinen sicheren Tunnel geladen werden.`);
                 if (currentCount < total) await sleep(3000);
             }
         }
