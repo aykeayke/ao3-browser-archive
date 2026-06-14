@@ -352,7 +352,7 @@ function buildCharts(library) {
 }
 
 // ==========================================
-// TABELLE RENDERN (Mit Kudos & farbigen Badges)
+// TABELLE RENDERN (Mit automatischem WIP-Check)
 // ==========================================
 function renderTable(filteredLibrary) {
     const tableBody = document.getElementById("libraryTableBody");
@@ -369,6 +369,16 @@ function renderTable(filteredLibrary) {
         const originalIndex = fullLibrary.findIndex(f => f.url === fic.url);
         const tr = document.createElement("tr");
 
+        // --- AUTOMATISCHER STATUS-CHECK ---
+        // Wenn bei den Kapiteln ein "?" steht, ist es IMMER ein WIP!
+        let currentStatus = fic.status || 'Abgeschlossen';
+        const chapterString = String(fic.chapters || '1/1');
+        
+        if (chapterString.includes('?')) {
+            currentStatus = 'WIP';
+        }
+
+        // Dynamisches Mapping für die echten AO3-Farben-Klassen
         let ratingClass = "rating-notrated";
         let displayRating = fic.rating || "Not Rated";
         
@@ -382,8 +392,8 @@ function renderTable(filteredLibrary) {
             <td>${fic.author || 'Anonymous'}</td>
             <td class="fandom-cell" title="${fic.fandoms || ''}">${fic.fandoms || 'Unbekannt'}</td>
             <td><span class="badge-rating ${ratingClass}">${displayRating}</span></td>
-            <td><span class="badge-status ${fic.status === 'WIP' ? 'wip' : 'done'}">${fic.status || 'Abgeschlossen'}</span></td>
-            <td>${fic.chapters || '1/1'}</td>
+            <td><span class="badge-status ${currentStatus === 'WIP' ? 'wip' : 'done'}">${currentStatus}</span></td>
+            <td>${chapterString}</td>
             <td>${(Number(fic.words) || 0).toLocaleString()}</td>
             <td>${(Number(fic.kudos) || 0).toLocaleString()}</td>
             <td>
