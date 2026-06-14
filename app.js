@@ -3,14 +3,14 @@ let chartInstances = {};
 let currentSortKey = 'none';
 let isAscending = true;
 
-// --- INITIALISIERUNG ---
+// --- INITIALISIERUNG BEIM LADEN DER SEITE ---
 document.addEventListener("DOMContentLoaded", () => {
-    // Event-Listener für die Filter-Dropdowns
+    // Filter-Events registrieren
     document.getElementById("filter-fandom").addEventListener("change", updateDashboard);
     document.getElementById("filter-rating").addEventListener("change", updateDashboard);
     document.getElementById("filter-status").addEventListener("change", updateDashboard);
 
-    // Event-Listener für die Tabellensortierung (Klick auf Header)
+    // Sortier-Events für die Spaltenüberschriften registrieren
     document.getElementById("th-title").addEventListener("click", () => sortTable('title'));
     document.getElementById("th-author").addEventListener("click", () => sortTable('author'));
     document.getElementById("th-rating").addEventListener("click", () => sortTable('rating'));
@@ -18,11 +18,14 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("th-words").addEventListener("click", () => sortTable('words'));
     document.getElementById("th-kudos").addEventListener("click", () => sortTable('kudos'));
 
+    // Klick-Event für den benutzerfreundlichen Lösch-Button
+    document.getElementById("btn-clear-storage").addEventListener("click", clearLibraryStorage);
+
     populateFilterDropdowns();
     updateDashboard();
 });
 
-// Sync mit Tampermonkey im Hintergrund
+// Synchronisierung mit Tampermonkey im Hintergrund
 window.addEventListener("storage", (event) => {
     if (event.key === "ao3_universal_library") {
         myLibrary = JSON.parse(event.newValue) || [];
@@ -56,28 +59,50 @@ function populateFilterDropdowns() {
     
     Array.from(uniqueFandoms).sort().forEach(fandom => {
         const opt = document.createElement("option");
-        opt.value = fandom; 
-        opt.innerText = fandom; 
-        fandomSelect.appendChild(opt);
+        opt.value = fandom; opt.innerText = fandom; fandomSelect.appendChild(opt);
     });
     fandomSelect.value = currentSelection || "all";
 }
 
 function sortTable(key) {
-    if (currentSortKey === key) { 
-        isAscending = !isAscending; 
-    } else { 
-        currentSortKey = key; 
-        isAscending = true; 
-    }
+    if (currentSortKey === key) { isAscending = !isAscending; } 
+    else { currentSortKey = key; isAscending = true; }
     updateDashboard();
 }
 
-// --- RENDERING & STATISTIKEN ---
+// --- BENUTZERFREUNDLICHE LÖSCH-FUNKTION ---
+function clearLibraryStorage() {
+    const confirmDelete = confirm("Bist du dir ganz sicher? Damit werden alle gesammelten Fics unwiderruflich aus deiner Schachtel gelöscht!");
+    
+    if (confirmDelete) {
+        // 1. Lokalen Speicher des Dashboards auf leeres Array setzen
+        localStorage.setItem("ao3_universal_library", "[]");
+        myLibrary = [];
+        
+        // 2. Alle Filter-Dropdowns visuell auf Standard zurücksetzen
+        document.getElementById("filter-fandom").value = "all";
+        document.getElementById("filter-rating").value = "all";
+        document.getElementById("filter-status").value = "all";
+        
+        // 3. Brücke schlagen: Künstliches Storage-Event abfeuern, damit Tampermonkey den Befehl empfängt
+        window.dispatchEvent(new StorageEvent('storage', {
+            key: 'ao3_universal_library',
+            newValue: '[]'
+        }));
+        
+        // 4. GUI direkt aktualisieren
+        populateFilterDropdowns();
+        updateDashboard();
+        
+        alert("Deine Schachtel wurde erfolgreich ausgefehrt! 🧼");
+    }
+}
+
+// --- CORE DASHBOARD LOGIK & STATISTIKEN ---
 function updateDashboard() {
     if (!document.getElementById("stat-total-fics")) return;
 
-    // 1. Basis-Zähler
+    // 1. Basis-Zähler befüllen
     document.getElementById("stat-total-fics").innerText = myLibrary.length;
     let totalWords = myLibrary.reduce((sum, fic) => sum + fic.words, 0);
     document.getElementById("stat-total-words").innerText = totalWords.toLocaleString("de-DE");
@@ -89,7 +114,7 @@ function updateDashboard() {
     else if (totalWords < 1000000) compSub.innerText = "Die gesamte 'Herr der Ringe'-Trilogie inhaliert.";
     else compSub.innerText = `Das entspricht ${Math.round(totalWords / 780000 * 10) / 10}x der gesamten Bibel.`;
 
-    // Lesezeit
+    // Lesezeit berechnen (250 Wörter / Minute)
     let readingMinutes = totalWords / 250;
     let readingHours = Math.round(readingMinutes / 60);
     document.getElementById("stat-reading-time").innerText = `${readingHours.toLocaleString("de-DE")} Std.`;
@@ -97,9 +122,11 @@ function updateDashboard() {
     if (readingHours > 0) {
         let days = (readingHours / 24).toFixed(1);
         timeJoke.innerText = `Das sind ${days} Tage deines Lebens am Stück.`;
+    } else {
+        timeJoke.innerText = "Schlaf wird ohnehin überbewertet.";
     }
 
-    // Top Autor & Kudos König
+    // Top Autor & Kudos König auswerten
     if (myLibrary.length > 0) {
         let authorCounts = {};
         myLibrary.forEach(fic => { authorCounts[fic.author] = (authorCounts[fic.author] || 0) + 1; });
@@ -109,9 +136,13 @@ function updateDashboard() {
         let topKudosFic = myLibrary.reduce((max, fic) => (fic.kudos || 0) > (max.kudos || 0) ? fic : max, myLibrary[0]);
         document.getElementById("stat-top-kudos").innerText = topKudosFic.title;
         document.getElementById("stat-top-kudos-val").innerText = `${(topKudosFic.kudos || 0).toLocaleString("de-DE")} Kudos`;
+    } else {
+        document.getElementById("stat-top-author").innerText = "Noch niemand";
+        document.getElementById("stat-top-kudos").innerText = "-";
+        document.getElementById("stat-top-kudos-val").innerText = "0 Kudos";
     }
 
-    // 2. Filter & Sortierung anwenden
+    // 2. Filter-Logik
     const selectedFandom = document.getElementById("filter-fandom").value;
     const selectedRating = document.getElementById("filter-rating").value;
     const selectedStatus = document.getElementById("filter-status").value;
@@ -123,18 +154,18 @@ function updateDashboard() {
         return matchesFandom && matchesRating && matchesStatus;
     });
 
+    // 3. Spalten-Sortierungs-Logik
     if (currentSortKey !== 'none') {
         displayList.sort((a, b) => {
-            let valA = a[currentSortKey] || 0; 
-            let valB = b[currentSortKey] || 0;
+            let valA = a[currentSortKey] || 0; let valB = b[currentSortKey] || 0;
             if (typeof valA === 'string') return isAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
             return isAscending ? valA - valB : valB - valA;
         });
     } else {
-        displayList.reverse();
+        displayList.reverse(); // Standard: Neueste zuerst
     }
 
-    // 3. Tabellen-DOM befüllen
+    // 4. Tabellen-DOM rendern
     const tbody = document.getElementById("library-body");
     if (displayList.length === 0) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; font-style:italic; color:#888;">Keine Werke entsprechen den Filtereinstellungen.</td></tr>`;
@@ -150,21 +181,26 @@ function updateDashboard() {
             <td><span class="status-badge">${fic.status || "Abgeschlossen"}</span></td>
             <td>${fic.words.toLocaleString("de-DE")}</td>
             <td>${fic.kudos ? fic.kudos.toLocaleString("de-DE") : "0"}</td>
-            <td><span class="td-fandoms">${fic.fandoms}</span></td>
+            <td><span style="font-size:11px; color:#555;">${fic.fandoms}</span></td>
         </tr>
     `).join("");
 
+    // 5. Diagramme aktualisieren
     renderAllCharts();
 }
 
-// --- CHART.JS VISUALISIERUNGEN ---
+// --- RENDERING DER DREI CANVAS-DIAGRAMME ---
 function renderAllCharts() {
-    if (myLibrary.length === 0) return;
+    if (myLibrary.length === 0) {
+        document.getElementById("charts-section").style.display = "none";
+        return;
+    }
     document.getElementById("charts-section").style.display = "flex";
 
+    // Alte Chart-Instanzen zerstören, um Overlapping-Glitches zu verhindern
     ['fandom', 'rating', 'length'].forEach(k => { if (chartInstances[k]) chartInstances[k].destroy(); });
 
-    // A. Fandom Chart
+    // A. Fandom Balkendiagramm (Top 5)
     let fandomData = {};
     myLibrary.forEach(fic => {
         let primary = fic.fandoms ? fic.fandoms.split(',')[0].trim() : "Unbekannt";
@@ -178,7 +214,7 @@ function renderAllCharts() {
         options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
     });
 
-    // B. Rating Chart
+    // B. Rating Kuchendiagramm
     let ratingCounts = { 'Explicit': 0, 'Mature': 0, 'Teen': 0, 'General': 0, 'Not Rated': 0 };
     myLibrary.forEach(fic => {
         if (!fic.rating) { ratingCounts['Not Rated']++; return; }
@@ -198,7 +234,7 @@ function renderAllCharts() {
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 10 } } } } }
     });
 
-    // C. Length Profiles Chart
+    // C. Fic-Längen-Profile
     let lengths = { 'Short (<5k)': 0, 'Mid (5k-20k)': 0, 'Long (20k-100k)': 0, 'Epic (>100k)': 0 };
     myLibrary.forEach(fic => {
         if (fic.words < 5000) lengths['Short (<5k)']++;

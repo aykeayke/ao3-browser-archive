@@ -18,7 +18,6 @@
 
 <div class="main-content">
     
-    <!-- STATISTIK-GRID -->
     <div class="stats-grid">
         <div class="stat-card">
             <h4>Werke in deiner Schachtel</h4>
@@ -37,23 +36,22 @@
         </div>
         <div class="stat-card">
             <h4>Lieblings-Autor/in</h4>
-            <p id="stat-top-author">Noch niemand</p>
+            <p id="stat-top-author" style="font-size: 15px; margin-top: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Noch niemand</p>
             <div class="sub-text">Besitzt deine Seele</div>
         </div>
-        <div class="stat-card stat-card-kudos">
+        <div class="stat-card" style="background: #f3fff5; border-color: #ccffdd;">
             <h4>👑 Der Kudos-König</h4>
-            <p id="stat-top-kudos">-</p>
-            <div id="stat-top-kudos-val" class="sub-text-kudos">0 Kudos</div>
+            <p id="stat-top-kudos" style="font-size: 14px; margin-top: 12px; color: #1b7530; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</p>
+            <div class="sub-text" id="stat-top-kudos-val" style="color: #1b7530; font-weight: bold;">0 Kudos</div>
         </div>
     </div>
 
-    <!-- DIAGRAMME -->
     <div class="charts-grid" id="charts-section" style="display: none;">
         <div class="chart-box">
             <h3>Fandom-Verteilung (nach gelesenen Wörtern)</h3>
             <div class="chart-wrapper"><canvas id="fandomChart"></canvas></div>
         </div>
-        <div class="chart-box chart-box-pie">
+        <div class="chart-box" style="flex: 0 1 340px;">
             <h3>Rating-Verteilung (Anzahl Fics)</h3>
             <div class="chart-wrapper"><canvas id="ratingChart"></canvas></div>
         </div>
@@ -63,14 +61,15 @@
         </div>
     </div>
 
-    <!-- DIGITALE BIBLIOTHEK -->
     <fieldset>
         <legend>Deine digitale Bibliothek</legend>
         
         <div class="filter-bar">
             <div class="filter-group">
                 <label for="filter-fandom">Fandom Filter</label>
-                <select id="filter-fandom"></select>
+                <select id="filter-fandom">
+                    <option value="all">Alle Fandoms</option>
+                </select>
             </div>
             <div class="filter-group">
                 <label for="filter-rating">Rating Filter</label>
@@ -90,6 +89,12 @@
                     <option value="Abgeschlossen">Abgeschlossen</option>
                     <option value="WIP">WIP</option>
                 </select>
+            </div>
+            
+            <div class="filter-group" style="margin-left: auto;">
+                <button id="btn-clear-storage" class="btn-clear">
+                    🗑️ Gesamte Schachtel leeren
+                </button>
             </div>
         </div>
 
