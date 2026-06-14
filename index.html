@@ -3,117 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archive of Our Own beta - Mein universelles Browser-Archiv</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>AO3 Universal Browser Archive</title>
+    <style>
+        :root {
+            --bg-color: #f7f7f7;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --primary-color: #990000;
+            --border-color: #dddddd;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        header {
+            margin-bottom: 30px;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+        h1 { margin: 0; color: var(--primary-color); }
+        
+        /* Stats Grid - Jetzt mit 3 Kacheln statt 4 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary-color);
+        }
+        .stat-card h3 { margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; color: #666; }
+        .stat-card .value { font-size: 24px; font-weight: bold; }
+
+        /* Table Styles */
+        .table-container {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        .fic-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .fic-link:hover { text-decoration: underline; }
+        
+        /* Fandom Spalten Begrenzung damit das Layout flach bleibt */
+        .fandom-cell {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Badges */
+        .badge-rating {
+            background: #e0e0e0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge-status {
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+            color: white;
+            font-weight: bold;
+        }
+        .badge-status.done { background-color: #2e7d32; }
+        .badge-status.wip { background-color: #f57c00; }
+        
+        /* Sterne Bewertung */
+        .star-rating {
+            color: #ffb300;
+            cursor: pointer;
+            font-size: 16px;
+            white-space: nowrap;
+        }
+        .star { margin-right: 2px; }
+        
+        .delete-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
 </head>
 <body>
 
-<div class="ao3-header">
-    <h1>Archive of Our Own</h1>
-    <div class="ao3-subheader">Mein unzerstörbares Browser-Archiv (Analytics Pro v1.5)</div>
-</div>
+<div class="container">
+    <header>
+        <h1>Schachtel-Archiv: Deine digitale Bibliothek</h1>
+    </header>
 
-<div class="main-content">
-    
+    <!-- Statistiken-Übersicht -->
     <div class="stats-grid">
         <div class="stat-card">
-            <h4>Werke in der Schachtel</h4>
-            <p id="stat-total-fics">0</p>
-            <div class="sub-text">Eingesammelte Trophäen</div>
+            <h3>Gespeicherte Werke</h3>
+            <div id="stat-total-fics" class="value">0</div>
         </div>
         <div class="stat-card">
-            <h4>Wörter gelesenen</h4>
-            <p id="stat-total-words">0</p>
-            <div id="literary-comparison" class="sub-text">-</div>
+            <h3>Worte Gesamt</h3>
+            <div id="stat-total-words" class="value">0</div>
         </div>
         <div class="stat-card">
-            <h4>Inoffizielle Lesezeit</h4>
-            <p id="stat-reading-time">0 Std.</p>
-            <div id="reading-time-joke" class="sub-text">Schlaf wird überbewertet.</div>
-        </div>
-        <div class="stat-card" style="background: #fffdf0; border-color: #ffecc0;">
-            <h4>⭐ Deine Durchschnitts-Note</h4>
-            <p id="stat-avg-rating">0.0 / 5</p>
-            <div class="sub-text" id="stat-rated-count">0 Fics bewertet</div>
-        </div>
-        <div class="stat-card" style="background: #f3fff5; border-color: #ccffdd;">
-            <h4>👑 Der Kudos-König</h4>
-            <p id="stat-top-kudos" style="font-size: 13px; margin-top: 12px; color: #1b7530; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</p>
-            <div class="sub-text" id="stat-top-kudos-val" style="color: #1b7530; font-weight: bold;">0 Kudos</div>
-        </div>
-        <div class="stat-card" style="display:none;">
-            <h4>Top-Autor</h4>
-            <p id="stat-top-author">-</p>
+            <h3>Kudos Gesamt</h3>
+            <div id="stat-total-kudos" class="value">0</div>
         </div>
     </div>
 
-    <div class="charts-grid" id="charts-section" style="display: none;">
-        <div class="chart-box">
-            <h3>Fandom-Verteilung (nach Wörtern)</h3>
-            <div class="chart-wrapper"><canvas id="fandomChart"></canvas></div>
-        </div>
-        <div class="chart-box" style="flex: 0 1 340px;">
-            <h3>Rating-Verteilung (Anzahl)</h3>
-            <div class="chart-wrapper"><canvas id="ratingChart"></canvas></div>
-        </div>
-        <div class="chart-box">
-            <h3>Fic-Längen-Profile (Anzahl)</h3>
-            <div class="chart-wrapper"><canvas id="lengthChart"></canvas></div>
-        </div>
-    </div>
-
-    <fieldset>
-        <legend>Deine digitale Bibliothek</legend>
-        
-        <div class="filter-bar">
-            <div class="filter-group">
-                <label for="filter-fandom">Fandom Filter</label>
-                <select id="filter-fandom"><option value="all">Alle Fandoms</option></select>
-            </div>
-            <div class="filter-group">
-                <label for="filter-rating">Rating Filter</label>
-                <select id="filter-rating">
-                    <option value="all">Alle Ratings</option>
-                    <option value="General Audiences">General Audiences</option>
-                    <option value="Teen And Up Audiences">Teen And Up</option>
-                    <option value="Mature">Mature</option>
-                    <option value="Explicit">Explicit</option>
-                    <option value="Not Rated">Not Rated</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="filter-status">Status Filter</label>
-                <select id="filter-status">
-                    <option value="all">Alle Stati</option>
-                    <option value="Abgeschlossen">Abgeschlossen</option>
-                    <option value="WIP">WIP</option>
-                </select>
-            </div>
-            
-            <div class="filter-group" style="margin-left: auto;">
-                <button id="btn-clear-storage" class="btn-clear">🗑️ Gesamte Schachtel leeren</button>
-            </div>
-        </div>
-
-        <table class="ao3-table">
+    <!-- Haupttabelle -->
+    <div class="table-container">
+        <h2>Bibliothekskatalog</h2>
+        <table id="ficTable">
             <thead>
                 <tr>
-                    <th id="th-rating-stars" style="width: 14%;">Bewertung</th>
-                    <th id="th-title" style="width: 24%;">Titel</th>
-                    <th id="th-author" style="width: 16%;">Autor</th>
-                    <th id="th-rating" style="width: 10%;">Rating</th>
-                    <th id="th-status" style="width: 10%;">Status</th>
-                    <th id="th-chapters" style="width: 8%;">Kapitel</th>
-                    <th id="th-words" style="width: 10%;">Wörter</th>
-                    <th id="th-kudos" style="width: 8%;">Kudos</th>
+                    <th>Titel</th>
+                    <th>Autor</th>
+                    <th>Fandoms</th>
+                    <th>Rating</th>
+                    <th>Status</th>
+                    <th>Kapitel</th>
+                    <th>Words</th>
+                    <th>Kudos</th>
+                    <th>Bookmark?</th>
+                    <th>Deine Bewertung</th>
+                    <th>Aktionen</th>
                 </tr>
             </thead>
-            <tbody id="library-body">
-                <tr><td colspan="8" style="text-align:center; font-style:italic; color:#888;">Noch keine Werke importiert.</td></tr>
+            <tbody id="libraryTableBody">
+                <!-- Wird dynamisch per app.js befüllt -->
             </tbody>
         </table>
-    </fieldset>
+    </div>
 </div>
 
 <script src="app.js"></script>
