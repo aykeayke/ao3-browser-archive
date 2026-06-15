@@ -24,15 +24,12 @@ function updateDashboard() {
     renderCharts(library);
 }
 
-// 1. Sortierung mit Indikatoren (Update der Header)
 function sortTable(column, headerEl) {
     currentSortDirection = (currentSortColumn === column && currentSortDirection === 'asc') ? 'desc' : 'asc';
     currentSortColumn = column;
-
-    // UI: Indikatoren zurücksetzen und setzen
     document.querySelectorAll('th').forEach(th => th.innerHTML = th.innerHTML.replace(' ▲', '').replace(' ▼', ''));
     headerEl.innerHTML += (currentSortDirection === 'asc' ? ' ▲' : ' ▼');
-
+    
     fullyFilteredList.sort((a, b) => {
         let valA = a[column] || '', valB = b[column] || '';
         return currentSortDirection === 'asc' ? valA.toString().localeCompare(valB) : valB.toString().localeCompare(valA);
@@ -40,23 +37,44 @@ function sortTable(column, headerEl) {
     renderTablePage();
 }
 
-// 2. Delete mit Bestätigung
 function deleteFic(index) {
-    if (confirm("Are you sure you want to delete this masterpiece from your library?")) {
+    if (confirm("Are you sure you want to delete this masterpiece?")) {
         let library = loadLibrary();
         library.splice(index, 1);
         saveLibrary(library);
     }
 }
 
-// 3. Charts mit Default-Ansicht
+function renderTablePage() {
+    const tableBody = document.getElementById("libraryTableBody");
+    if (!tableBody) return;
+    tableBody.innerHTML = "";
+    
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const pageItems = fullyFilteredList.slice(startIndex, startIndex + itemsPerPage);
+
+    pageItems.forEach((fic, idx) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><a href="${fic.url}" target="_blank" style="color:var(--ao3-red);font-weight:bold;">${fic.title}</a></td>
+            <td>${fic.author}</td>
+            <td>${fic.fandoms}</td>
+            <td>${fic.rating}</td>
+            <td><span class="badge-status ${fic.status === 'WIP' ? 'wip' : ''}">${fic.status}</span></td>
+            <td>${fic.chapters}</td>
+            <td>${fic.words}</td>
+            <td>${fic.kudos}</td>
+            <td><button onclick="deleteFic(${idx})">🗑️</button></td>
+        `;
+        tableBody.appendChild(tr);
+    });
+}
+
 function renderCharts(library) {
     const isReady = library.length > 0;
-    
-    // Daten vorbereiten (Default, falls leer)
-    const fandomCounts = isReady ? {} : { "No Fandoms Yet": 1 };
-    const ratingCounts = isReady ? {} : { "Waiting...": 1 };
-    const wordBuckets = isReady ? {} : { "Empty": 1 };
+    const fandomCounts = isReady ? {} : { "Waiting for Sync": 1 };
+    const ratingCounts = isReady ? {} : { "Waiting for Sync": 1 };
+    const wordBuckets = isReady ? {} : { "No Data": 1 };
 
     if (isReady) {
         library.forEach(f => {
@@ -73,47 +91,16 @@ function renderCharts(library) {
     if (wordLengthChartInstance) wordLengthChartInstance.destroy();
 
     fandomChartInstance = new Chart(document.getElementById('fandomChart'), {
-        type: 'bar',
-        data: { labels: Object.keys(fandomCounts), datasets: [{ label: 'Works', data: Object.values(fandomCounts), backgroundColor: '#990000' }] }
+        type: 'bar', data: { labels: Object.keys(fandomCounts), datasets: [{ label: 'Works', data: Object.values(fandomCounts), backgroundColor: '#990000' }] }
     });
     ratingChartInstance = new Chart(document.getElementById('ratingChart'), {
-        type: 'pie',
-        data: { labels: Object.keys(ratingCounts), datasets: [{ data: Object.values(ratingCounts), backgroundColor: isReady ? ['#4caf50', '#ffeb3b', '#ff9800', '#f44336', '#9e9e9e'] : ['#ccc'] }] }
+        type: 'pie', data: { labels: Object.keys(ratingCounts), datasets: [{ data: Object.values(ratingCounts), backgroundColor: isReady ? ['#4caf50', '#ffeb3b', '#ff9800', '#f44336', '#9e9e9e'] : ['#ccc'] }] }
     });
     wordLengthChartInstance = new Chart(document.getElementById('wordLengthChart'), {
-        type: 'doughnut',
-        data: { labels: Object.keys(wordBuckets), datasets: [{ data: Object.values(wordBuckets), backgroundColor: isReady ? ['#3e95cd', '#8e5ea2', '#3cba9f'] : ['#ccc'] }] }
+        type: 'doughnut', data: { labels: Object.keys(wordBuckets), datasets: [{ data: Object.values(wordBuckets), backgroundColor: isReady ? ['#3e95cd', '#8e5ea2', '#3cba9f'] : ['#ccc'] }] }
     });
 }
 
-// 4. Rendering (Table mit Delete-Button & sortTable Aufruf)
-function renderTablePage() {
-    const tableBody = document.getElementById("libraryTableBody");
-    if (!tableBody) return;
-    tableBody.innerHTML = "";
-    
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const pageItems = fullyFilteredList.slice(startIndex, startIndex + itemsPerPage);
-
-    pageItems.forEach((fic, idx) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-            <td><a href="${fic.url}" target="_blank">${fic.title}</a></td>
-            <td>${fic.author}</td>
-            <td>${fic.fandoms}</td>
-            <td>${fic.rating}</td>
-            <td>${fic.status}</td>
-            <td>${fic.chapters}</td>
-            <td>${fic.words}</td>
-            <td>${fic.kudos}</td>
-            <td>${fic.userRating || 0}</td>
-            <td><button onclick="deleteFic(${idx})" title="Delete">🗑️</button></td>
-        `;
-        tableBody.appendChild(tr);
-    });
-}
-
-// Utils (Filter, Import, Export, etc.)
 function applyFilters() {
     const library = loadLibrary();
     const searchTerm = document.getElementById("searchBar").value.toLowerCase();
@@ -130,31 +117,17 @@ function applyFilters() {
 
 function generateFunFact(totalWords, totalFics) {
     const factTextEl = document.getElementById("fun-fact-text");
-    if (!factTextEl) return;
-    factTextEl.innerText = totalFics === 0 ? "Library empty! Go read something. 💕" : `Your library holds ${totalFics} masterpieces! 💎`;
-}
-
-function exportData() {
-    const data = localStorage.getItem("ao3_universal_library");
-    const blob = new Blob([data], {type: "application/json"});
-    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "ao3_archive_backup.json"; a.click();
-}
-
-function importData(e) {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = (event) => { saveLibrary(JSON.parse(event.result)); };
-    reader.readAsText(file);
+    if (factTextEl) factTextEl.innerText = totalFics === 0 ? "Library empty! Go read something. 💕" : `Your library holds ${totalFics} masterpieces! 💎`;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("searchBar").addEventListener("input", applyFilters);
-    document.getElementById("exportBtn").addEventListener("click", exportData);
-    document.getElementById("importBtn").addEventListener("click", () => document.getElementById("importFileInp").click());
-    document.getElementById("importFileInp").addEventListener("change", importData);
+    document.getElementById("exportBtn").addEventListener("click", () => {
+        const data = localStorage.getItem("ao3_universal_library");
+        const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([data])); a.download = "archive.json"; a.click();
+    });
     document.getElementById("clearAllBtn").addEventListener("click", () => { if(confirm("Delete EVERYTHING?")) saveLibrary([]); });
     
-    // Header Click Event für Sortierung
     document.querySelectorAll('th').forEach(th => {
         th.addEventListener('click', () => sortTable(th.innerText.toLowerCase().split(' ')[0], th));
     });

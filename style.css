@@ -1,58 +1,65 @@
 :root {
     --ao3-red: #990000;
-    --ao3-red-hover: #660000;
+    --ao3-red-hover: #bd0000;
     --ao3-bg: #ffffff;
-    --ao3-body-bg: #f4f4f4;
+    --ao3-body-bg: #f0f2f5;
     --ao3-text: #2a2a2a;
-    --ao3-border: #cccccc;
+    --ao3-border: #e0e0e0;
     --ao3-fact-bg: #fffbf0;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --transition: all 0.3s ease;
 }
 
 body {
-    font-family: "Lucida Grande", "Lucida Sans Unicode", "GNU Unifont", Verdana, Helvetica, sans-serif;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--ao3-body-bg);
     color: var(--ao3-text);
     margin: 0;
-    padding: 0;
-    line-height: 1.4;
+    padding: 20px;
+    line-height: 1.6;
 }
 
 .container {
-    max-width: 1350px;
-    margin: 20px auto;
+    max-width: 1200px;
+    margin: 0 auto;
     background: var(--ao3-bg);
-    padding: 20px;
-    border: 1px solid var(--ao3-border);
-    border-radius: 5px;
-    box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
-    box-sizing: border-box;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
 }
 
-header { margin-bottom: 25px; border-bottom: 1px solid var(--ao3-red); padding-bottom: 5px; }
-h1 { margin: 0; color: var(--ao3-red); font-size: 24px; font-family: Georgia, serif; font-weight: normal; }
+header { margin-bottom: 30px; border-bottom: 2px solid var(--ao3-red); padding-bottom: 10px; }
+h1 { margin: 0; color: var(--ao3-red); font-size: 28px; font-family: 'Georgia', serif; letter-spacing: -0.5px; }
 
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
-.stat-card { background: var(--ao3-bg); padding: 15px; border-radius: 4px; border: 1px solid var(--ao3-border); border-top: 3px solid var(--ao3-red); text-align: center; }
-.stat-card h3 { margin: 0 0 8px 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #555; }
-.stat-card .value { font-size: 20px; font-weight: bold; color: var(--ao3-text); font-family: Georgia, serif; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+.stat-card { 
+    background: #fff; padding: 20px; border-radius: 10px; border: 1px solid var(--ao3-border); 
+    box-shadow: inset 0 -3px 0 var(--ao3-red); text-align: center; transition: var(--transition);
+}
+.stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+.stat-card h3 { margin: 0 0 10px 0; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #888; }
+.stat-card .value { font-size: 24px; font-weight: 700; color: var(--ao3-text); }
 
-.fun-fact-card { background: var(--ao3-fact-bg); border: 1px solid #e2b34c; padding: 12px 15px; border-radius: 4px; margin-bottom: 25px; font-size: 13px; color: #8a6d1c; display: flex; align-items: center; gap: 10px; }
+.fun-fact-card { 
+    background: var(--ao3-fact-bg); border-left: 5px solid #e2b34c; padding: 15px 20px; 
+    border-radius: 0 8px 8px 0; margin-bottom: 30px; font-style: italic; color: #5a4a20;
+}
 
-.charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 25px; }
-.chart-card { background: var(--ao3-bg); padding: 15px; border-radius: 4px; border: 1px solid var(--ao3-border); height: 320px; box-sizing: border-box; }
-.chart-card h3 { margin: 0 0 10px 0; color: var(--ao3-red); font-size: 15px; font-family: Georgia, serif; border-bottom: 1px dashed var(--ao3-border); padding-bottom: 5px; }
-.chart-wrapper { position: relative; height: 240px; width: 100%; }
+.charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; margin-bottom: 30px; }
+.chart-card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--ao3-border); }
 
-.filter-section { background: #eee; border: 1px solid var(--ao3-border); padding: 12px 15px; border-radius: 4px; margin-bottom: 25px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center; }
-.filter-group { display: flex; flex-direction: column; gap: 4px; }
-.filter-group label { font-size: 11px; font-weight: bold; color: var(--ao3-text); }
-.filter-group select, .filter-group input { padding: 5px 8px; border: 1px solid var(--ao3-border); border-radius: 3px; font-size: 13px; }
+.filter-section { background: #f8f9fa; border: 1px solid var(--ao3-border); padding: 20px; border-radius: 10px; display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px; }
+.filter-group label { display: block; font-size: 10px; text-transform: uppercase; margin-bottom: 5px; }
+.filter-group select, .filter-group input { padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; }
 
-table { width: 100%; border-collapse: collapse; border: 1px solid var(--ao3-border); }
-th, td { padding: 10px; border: 1px solid var(--ao3-border); font-size: 13px; }
-th { background: linear-gradient(to bottom, #ffffff 0%, #e9e9e9 100%); cursor: pointer; }
-.fic-link { color: var(--ao3-red); font-weight: bold; text-decoration: none; }
-.badge-status.done { background-color: #666666; color: white; padding: 2px 5px; }
-.badge-status.wip { background-color: #990000; color: white; padding: 2px 5px; }
-.empty-msg { text-align: center; color: #666; padding: 20px; }
-.star-rating { color: #e2b34c; cursor: pointer; }
+table { width: 100%; border-collapse: separate; border-spacing: 0; }
+th { background: #fdfdfd; padding: 15px; border-bottom: 2px solid var(--ao3-red); text-align: left; font-size: 12px; cursor: pointer; transition: var(--transition); }
+th:hover { background: #f0f0f0; }
+td { padding: 15px; border-bottom: 1px solid var(--ao3-border); }
+tr:hover { background-color: #fff9f9; }
+
+.badge-status { font-size: 10px; padding: 4px 8px; border-radius: 12px; text-transform: uppercase; font-weight: bold; }
+.badge-status.wip { background: var(--ao3-red); color: white; }
+button { background: var(--ao3-red); color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; transition: var(--transition); }
+button:hover { background: var(--ao3-red-hover); transform: scale(1.05); }
+.star-rating { color: #e2b34c; font-size: 18px; }
