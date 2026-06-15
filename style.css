@@ -1,252 +1,63 @@
-/* --- AO3 LAYOUT & BRANDING --- */
-body { 
-    font-family: "Lucida Grande", "Lucida Sans Unicode", sans-serif; 
-    margin: 0; 
-    padding: 0; 
-    background-color: #ffffff; 
-    color: #333333; 
-    font-size: 13px; 
-}
-.ao3-header { 
-    background: #990000; 
-    color: #ffffff; 
-    padding: 12px 20px; 
-    border-bottom: 4px solid #fff; 
-}
-.ao3-header h1 { 
-    font-family: Georgia, serif; 
-    font-size: 28px; 
-    margin: 0; 
-    font-weight: normal; 
-}
-.ao3-subheader { 
-    font-size: 14px; 
-    color: #ffcccc; 
-    font-weight: bold; 
-}
-.main-content { 
-    max-width: 1300px; 
-    margin: 20px auto; 
-    padding: 0 20px; 
+/* Grunddesign: AO3-inspiriertes, sauberes Design */
+body {
+    background-color: #f7f7f7;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    color: #333;
+    padding: 20px;
 }
 
-/* STATS KACHELN */
-.stats-grid { 
-    display: flex; 
-    gap: 15px; 
-    margin-bottom: 25px; 
-    flex-wrap: wrap; 
-}
-.stat-card { 
-    flex: 1; 
-    min-width: 200px; 
-    background: #fff3f3; 
-    border: 1px solid #ffcccc; 
-    border-radius: 4px; 
-    padding: 15px; 
-    text-align: center; 
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
-}
-.stat-card h4 { 
-    margin: 0; 
-    color: #666; 
-    text-transform: uppercase; 
-    font-size: 11px; 
-    letter-spacing: 0.5px; 
-}
-.stat-card p { 
-    margin: 8px 0 0 0; 
-    font-family: Georgia, serif; 
-    font-size: 20px; 
-    font-weight: bold; 
-    color: #990000; 
-}
-.stat-card .sub-text { 
-    font-size: 11px; 
-    color: #666; 
-    font-style: italic; 
-    margin-top: 4px; 
+/* Stat Cards: Der Fandom-Schmerz-Look */
+.stat-card {
+    background: #ffffff;
+    border-left: 5px solid #990000; /* AO3 Red */
+    padding: 15px;
+    margin: 10px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
 }
 
-/* DIAGRAMME EXPORT */
-.charts-grid { 
-    display: flex; 
-    gap: 20px; 
-    margin-bottom: 25px; 
-    flex-wrap: wrap; 
-}
-.chart-box { 
-    flex: 1; 
-    min-width: 340px; 
-    background: #fff; 
-    border: 1px solid #ddd; 
-    border-radius: 4px; 
-    padding: 15px; 
-}
-.chart-box h3 { 
-    font-family: Georgia, serif; 
-    color: #990000; 
-    margin-top: 0; 
-    font-size: 14px; 
-    border-bottom: 1px solid #eee; 
-    padding-bottom: 8px; 
-}
-.chart-wrapper { 
-    max-width: 100%; 
-    height: 260px; 
-    position: relative; 
-    margin: 0 auto; 
-}
-
-fieldset { 
-    border: 1px solid #ccc; 
-    border-radius: 4px; 
-    padding: 20px; 
-    margin-bottom: 25px; 
-    background: #fcfcfc; 
-}
-legend { 
-    font-family: Georgia, serif; 
-    font-size: 16px; 
-    color: #990000; 
-    font-weight: bold; 
-    padding: 0 6px; 
-}
-
-/* FILTER LEISTE */
-.filter-bar { 
-    display: flex; 
-    gap: 15px; 
-    margin-bottom: 15px; 
-    background: #eaeaee; 
-    padding: 10px; 
-    border-radius: 4px; 
-    border: 1px solid #ccc; 
-    align-items: flex-end; 
-    flex-wrap: wrap; 
-}
-.filter-group { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 4px; 
-}
-.filter-group label { 
-    font-size: 11px; 
-    font-weight: bold; 
-    color: #444; 
-}
-.filter-group select { 
-    padding: 4px 8px; 
-    border-radius: 3px; 
-    border: 1px solid #bbb; 
-    font-size: 12px; 
-    background: white; 
-    min-width: 140px; 
-}
-
-.btn-clear { 
-    background: #eaeaee; 
-    color: #900; 
-    border: 1px solid #ccc; 
-    padding: 5px 12px; 
-    border-radius: 3px; 
-    cursor: pointer; 
-    font-weight: bold; 
-    font-size: 12px; 
-}
-.btn-clear:hover { 
-    background-color: #fff1f1; 
-    border-color: #900; 
-}
-
-/* DIE DIGITALE TABELLE */
-.ao3-table { 
-    width: 100%; 
-    border-collapse: collapse; 
-    margin-top: 10px; 
-}
-.ao3-table th { 
-    background: #eaeaee; 
-    color: #000; 
-    border: 1px solid #ccc; 
-    padding: 8px; 
-    font-size: 12px; 
-    text-align: left; 
-    cursor: pointer; 
-    user-select: none; 
-    position: relative; 
-}
-.ao3-table th:hover { 
-    background: #dcdcdc; 
-}
-.ao3-table th::after { 
-    content: ' ↕'; 
-    font-size: 10px; 
-    color: #888; 
-    position: absolute; 
-    right: 8px; 
-}
-.ao3-table td { 
-    border: 1px solid #ccc; 
-    padding: 8px; 
-    vertical-align: top; 
-}
-.ao3-table tr:nth-child(even) { 
-    background: #f7f7fa; 
-}
-.ao3-table a { 
-    color: #900; 
-    font-weight: bold; 
-    text-decoration: none; 
-}
-.ao3-table a:hover { 
-    text-decoration: underline; 
-}
-
-/* AO3 INFOMARKER */
-.badge { 
-    padding: 2px 6px; 
-    border-radius: 3px; 
-    font-size: 11px; 
-    font-weight: bold; 
-    color: white; 
-    display: inline-block; 
-}
-.rating-explicit { background-color: #990000; }
-.rating-mature { background-color: #fe7100; }
-.rating-teen { background-color: #e2c110; color: #333; }
-.rating-general { background-color: #2ebd59; }
-.rating-notrated { background-color: #777777; }
-.status-badge { font-size: 11px; font-style: italic; color: #555; }
-
-/* KAPIELSPALTE FORMATE */
-.ao3-table td:nth-child(6) {
-    font-family: monospace;
+/* Status Badges: Humor-Integration */
+.badge-status {
+    padding: 4px 8px;
+    border-radius: 4px;
     font-size: 12px;
-    text-align: center;
+    font-weight: bold;
 }
 
-/* --- OPTIMIERTES HELL LEUCHTENDES RATINGSYSTEM --- */
-.star-rating {
-    color: #e0e0e0; 
+.badge-status.done {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.badge-status.wip {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+/* Tabellen-Stil */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.empty-msg { text-align: center; color: #666; padding: 20px; }
+
+/* Delete Button: Der "Abgrund"-Button */
+.delete-btn {
     cursor: pointer;
-    font-size: 18px; 
-    display: inline-block;
-    white-space: nowrap;
-    user-select: none;
-    transition: all 0.2s ease;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
 }
 
-/* Stark leuchtendes Gelb-Gold für gesetzte Sterne */
-.star-rating .star.active {
-    color: #ffdb14;
-    text-shadow: 0 0 4px rgba(255, 219, 20, 0.6);
-}
-
-/* Hover-Effekt: Sterne fluten dynamisch von links zur Maus hin auf */
-.star-rating:hover .star {
-    color: #ffea70;
-}
-.star-rating .star:hover ~ .star {
-    color: #e0e0e0; 
-}
+/* Rating Badges */
+.rating-general { color: #2e7d32; }
+.rating-teen { color: #e65100; }
+.rating-mature { color: #c2185b; }
+.rating-explicit { color: #990000; }
