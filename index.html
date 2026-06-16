@@ -1,130 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AO3 Universal Browser Archive</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reading Archive</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
-<div class="container">
-    <header>
-        <h1>Your Pit of Despair: An Archive for AO3 Addicts</h1>
-    </header>
+  <header class="header">
+    <div class="container">
+      <h1>Archive of Emotional Damage</h1>
+      <p class="subtitle">A carefully curated list of emotional damage.</p>
 
-    <div class="stats-grid">
-        <div class="stat-card">
-            <h3>Masterpieces Hoarded</h3>
-            <div id="stat-total-fics" class="value">0</div>
-        </div>
-        <div class="stat-card">
-            <h3>Words That Melted Your Brain</h3>
-            <div id="stat-total-words" class="value">0</div>
-        </div>
-        <div class="stat-card">
-            <h3>Time You Should’ve Spent Sleeping</h3>
-            <div id="stat-reading-time" class="value">0 Hours</div>
-        </div>
-        <div class="stat-card">
-            <h3>The Primary Enabler (Top Author)</h3>
-            <div id="stat-top-author" class="value">-</div>
-        </div>
     </div>
+  </header>
 
-    <div id="fun-fact-container" class="fun-fact-card">
-        <span>✨</span> <div id="fun-fact-text">Load data for fun facts...</div>
+  <section class="stats">
+    <div class="container stats-grid">
+
+      <div class="stat">
+        <span class="num">0</span>
+        <span class="label">Works</span>
+      </div>
+
+      <div class="stat">
+        <span class="num">0</span>
+        <span class="label">Words</span>
+      </div>
+
+      <div class="stat">
+        <span class="num">0h</span>
+        <span class="label">Time lost</span>
+      </div>
+
+      <div class="stat">
+        <span class="num">—</span>
+        <span class="label">Top author</span>
+      </div>
+
     </div>
+  </section>
 
-    <div class="charts-container">
-        <div class="chart-card">
-            <h3>Top Fandoms</h3>
-            <div class="chart-wrapper">
-                <canvas id="fandomChart"></canvas>
-            </div>
-        </div>
-        <div class="chart-card">
-            <h3>Distribution by Rating</h3>
-            <div class="chart-wrapper">
-                <canvas id="ratingChart"></canvas>
-            </div>
-        </div>
-        <div class="chart-card">
-            <h3>Works by Word Count</h3>
-            <div class="chart-wrapper">
-                <canvas id="wordLengthChart"></canvas>
-            </div>
-        </div>
-    </div>
+<section class="container charts-section">
 
-    <div class="filter-section">
-        <div class="filter-group">
-            <label for="searchBar">Search (Title, Author...)</label>
-            <input type="text" id="searchBar" placeholder="Type to search...">
-        </div>
-        <div class="filter-group">
-            <label for="filterFandom">Fandom</label>
-            <select id="filterFandom">
-                <option value="all">All Fandoms</option>
-            </select>
-        </div>
-        <div class="filter-group">
-            <label for="filterStatus">Status</label>
-            <select id="filterStatus">
-                <option value="all">All</option>
-                <option value="Completed">Completed</option>
-                <option value="WIP">WIP</option>
-            </select>
-        </div>
-        <div class="filter-group">
-            <label for="perPageSelect">Works per Page</label>
-            <select id="perPageSelect">
-                <option value="10" selected>10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-            </select>
-        </div>
+  <div class="chart-box">
+    <h3>Top Fandoms</h3>
+    <canvas id="fandomChart"></canvas>
+  </div>
 
-        <div class="filter-group">
-            <button id="exportBtn" class="pagination-btn" title="Save library as JSON">📥 Export</button>
-            <input type="file" id="importFileInp" accept=".json" style="display: none;">
-            <button id="importBtn" class="pagination-btn" title="Import JSON backup">📤 Import</button>
-            <button id="clearAllBtn" class="pagination-btn" title="Empty Entire Archive">🚨 Delete Everything</button>
-        </div>
-    </div>
+  <div class="chart-box">
+    <h3>Ratings Distribution</h3>
+    <canvas id="ratingChart"></canvas>
+  </div>
 
-    <div class="table-container">
-        <div class="table-header-flex">
-            <h2>Library Catalog</h2>
-        </div>
-        <table id="ficTable">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Author</th>
-                    <th>Fandoms</th>
-                    <th>Rating</th>
-                    <th>Status</th>
-                    <th>Chapters</th>
-                    <th>Words</th>
-                    <th>Kudos</th>
-                    <th>Your Rating</th>
-                    <th>Delete</th>
-                </tr>
-            </thead>
-            <tbody id="libraryTableBody">
-            </tbody>
-        </table>
-        
-        <div class="pagination-container">
-            <button id="prevPageBtn" class="pagination-btn" disabled>« Back</button>
-            <span id="paginationInfo" class="pagination-info">Page 1 of 1</span>
-            <button id="nextPageBtn" class="pagination-btn" disabled>Forward »</button>
-        </div>
-    </div>
-</div>
+  <div class="chart-box">
+    <h3>Works by Word Count</h3>
+    <canvas id="wordChart"></canvas>
+  </div>
 
-<script src="app.js"></script>
+</section>
+
+<section class="library-section">
+
+  <div class="library-toolbar">
+    <input id="searchInput" placeholder="Search..." oninput="renderLibrary()" />
+
+    <button onclick="exportFics()">Export</button>
+    <input type="file" id="importFile" onchange="importFics(event)" hidden />
+    <button onclick="document.getElementById('importFile').click()">Import</button>
+
+    <button class="danger" onclick="clearAllFics()">Delete All</button>
+  </div>
+
+  <table class="library-table">
+
+    <thead>
+      <tr>
+        <th onclick="sortBy('title')">Title <span id="sort-title"></span></th>
+<th onclick="sortBy('author')">Author <span id="sort-author"></span></th>
+<th onclick="sortBy('fandoms')">Fandom(s) <span id="sort-fandoms"></span></th>
+<th onclick="sortBy('status')">Status <span id="sort-status"></span></th>
+<th onclick="sortBy('rating')">Rating <span id="sort-rating"></span></th>
+<th onclick="sortBy('chapters')">Chapters <span id="sort-chapters"></span></th>
+<th onclick="sortBy('words')">Words <span id="sort-words"></span></th>
+<th onclick="sortBy('kudos')">Kudos <span id="sort-kudos"></span></th>
+<th onclick="sortBy('userRating')">Your Rating <span id="sort-userRating"></span>
+  <th>Notes</th>
+</th>
+<th>Delete</th>
+      </tr>
+    </thead>
+
+    <tbody id="libraryBody"></tbody>
+
+  </table>
+
+</section>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="js/script.js"></script>
+
 </body>
 </html>
