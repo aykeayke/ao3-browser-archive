@@ -19,7 +19,15 @@ let openNotesIndex = null;
 
 async function getFics() {
   const res = await fetch(GITHUB_RAW);
-  return await res.json();
+
+  const text = await res.text();
+
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    console.error("Invalid JSON from GitHub:", text);
+    return [];
+  }
 }
 
 async function saveFics(fics) {
